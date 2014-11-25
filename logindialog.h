@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QLabel>
+#include <QMainWindow>
 #include <QPushButton>
 #include <QDialogButtonBox>
 #include <QLineEdit>
@@ -11,11 +12,15 @@
 
 #include "logindialog.h"
 
+class MainWindow;
+
 class LoginDialog: public QDialog
 {
     Q_OBJECT
 
 private:
+        MainWindow* host;
+
         QLabel* labelUsername;
         QLabel* labelPassword;
         QLabel* noticeLabel;
@@ -25,9 +30,11 @@ private:
 
         void setUpGUI();
         bool canLogin(const QString& username, const QString& password);
+        void storeUsernameToSetting(const QString& username);
 
 public:
     explicit LoginDialog(QWidget *parent = 0);
+    void bindMainwindow(MainWindow* mainwindow);
     void setUsername( const QString& username );
     void setPassword( const QString& password );
     void setUsernamesList( const QStringList& usernames );

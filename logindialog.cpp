@@ -1,4 +1,9 @@
+#include <QByteArray>
+#include <QSettings>
+
+#include "global.h"
 #include "logindialog.h"
+#include "mainwindow.h"
 
 LoginDialog::LoginDialog(QWidget *parent) :
     QDialog(parent)
@@ -6,6 +11,11 @@ LoginDialog::LoginDialog(QWidget *parent) :
     setUpGUI();
     setWindowTitle(tr("欢迎使用") );
     setModal(true);
+}
+// 绑定Mainwindow，这样我们就能直接把用户名传递给它了……懒得重复解码用户名
+void LoginDialog::bindMainwindow(MainWindow* mainwindow)
+{
+    host = mainwindow;
 }
 
 void LoginDialog::setUpGUI()
@@ -72,6 +82,7 @@ void LoginDialog::slotAcceptLogin()
 
     bool isLogined = canLogin(username, password);
     if (isLogined) {
+        storeUsernameToSetting(username);
         // close this dialog with QDialog::Accepted
         accept();
     }
@@ -88,3 +99,14 @@ bool LoginDialog::canLogin(const QString& username, const QString& password)
     }
     return false;
 }
+
+void LoginDialog::storeUsernameToSetting(const QString& username)
+{
+    QSettings setting("ScheduleKeeper", "ScheduleKeeper");
+    host->setUsername(username);
+    QByteArray sessionUser((SESSSION_KEY + username).toStdString().c_str());
+
+    setting.setValue("username", sessionUser.toBase64(QByteArray::Base64Encoding));
+    qDebug() << QByteArray::fromBase64(setting.value("username").toByteArray()).data();
+}
+

@@ -20,4 +20,4 @@ HEADERS  += mainwindow.h \
     logindialog.h \
     global.h
 
-FORMS    += mainwindow.ui
+FORMS    +=
