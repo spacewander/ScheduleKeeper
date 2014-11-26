@@ -12,6 +12,7 @@ LoginDialog::LoginDialog(QWidget *parent) :
     setWindowTitle(tr("欢迎使用") );
     setModal(true);
 }
+
 // 绑定Mainwindow，这样我们就能直接把用户名传递给它了……懒得重复解码用户名
 void LoginDialog::bindMainwindow(MainWindow* mainwindow)
 {

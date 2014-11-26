@@ -5,11 +5,14 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    settings("ScheduleKeeper", "ScheduleKeeper")
+    settings("ScheduleKeeper", "ScheduleKeeper"),
+    settingsDialog(parent)
 {
     centralWidget = new QWidget(this);
     setCentralWidget(centralWidget);
 
+    // set up all the core data
+    lastUpdateTime = QDateTime::currentDateTime();
 }
 
 MainWindow::~MainWindow()
@@ -43,7 +46,9 @@ void MainWindow::setUpGUI()
     leftMargin->setMinimumWidth(50);
     usernameLabel = new QLabel(username);
     usernameLabel->setMinimumWidth(200);
+
     settingAction = new QAction(tr("更改设置"), this);
+    connect(settingAction, SIGNAL(triggered()), &settingsDialog, SLOT(exec()));
 
     sortMenu = new QMenu(tr("排序方式"));
     sortByCreatedTime = new QAction(tr("按创建时间排序"), this);
@@ -68,6 +73,13 @@ void MainWindow::setUpGUI()
             }");
     clearSearchResultAction = new QAction(tr("清空结果"), this);
     clearSearchResultAction->setEnabled(false);
+    connect(searchEdit, SIGNAL(textEdited(const QString &)), 
+            this, SLOT(enableClearSearch(const QString &)));
+    connect(clearSearchResultAction, SIGNAL(triggered()), 
+            searchEdit, SLOT(clear()));
+    connect(clearSearchResultAction, &QAction::triggered, [&]() {
+            clearSearchResultAction->setEnabled(false);
+    });
 
     QLabel *rightMargin = new QLabel("");
     rightMargin->setMinimumWidth(50);
@@ -106,5 +118,17 @@ void MainWindow::setUpGUI()
 
 void MainWindow::refreshLastUpdateTime()
 {
-
+    lastUpdateTime = QDateTime::currentDateTime();
+    lastUpdateLabel->setText(lastUpdateTime.toString("yyyy.MM.dd.hh.mm"));
 }
+
+void MainWindow::enableClearSearch(const QString& text)
+{
+    if (text.size()) {
+        clearSearchResultAction->setEnabled(true);
+    }
+    else {
+        clearSearchResultAction->setEnabled(false);
+    }
+}
+

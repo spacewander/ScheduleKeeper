@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QAction>
+#include <QDateTime>
 #include <QGridLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -10,6 +11,8 @@
 #include <QMenu>
 #include <QSettings>
 #include <QToolBar>
+
+#include "settingsdialog.h"
 
 class MainWindow : public QMainWindow
 {
@@ -25,17 +28,22 @@ public:
      */
     void setUsername(const QString& username);
 
+private slots:
+    void enableClearSearch(const QString &text);
+
 private:
     /**
      * @brief refreshLastUpdateTime
      * 更新最近一次更新的时间，会修改相关的UI
      */
     void refreshLastUpdateTime();
+    QDateTime lastUpdateTime;
 
     QString username;
     // set layout to QMainWindow
     QWidget *centralWidget;
     QSettings settings;
+    SettingsDialog settingsDialog;
 
     QToolBar *toolbar;
     QLabel *usernameLabel;
