@@ -29,22 +29,31 @@ void LoginDialog::setUpGUI()
     // characters
     editPassword = new QLineEdit( this );
     editPassword->setEchoMode( QLineEdit::Password );
+    ensurePassword = new QLineEdit( this );
+    ensurePassword->setEchoMode( QLineEdit::Password );
+    ensurePassword->setVisible(false);
 
     // initialize the labels
     labelUsername = new QLabel( this );
     labelPassword = new QLabel( this );
+    labelEnsurePassword = new QLabel( this );
     labelUsername->setText( tr( "用户名" ) );
     labelUsername->setBuddy( editUsername );
     labelPassword->setText( tr( "密码" ) );
     labelPassword->setBuddy( editPassword );
+    labelEnsurePassword->setText( tr( "确认密码" ) );
+    labelEnsurePassword->setBuddy( ensurePassword );
+    labelEnsurePassword->setVisible(false);
 
 
 
     // initialize buttons
     buttons = new QDialogButtonBox( this );
     buttons->addButton( QDialogButtonBox::Ok );
+    buttons->addButton( QDialogButtonBox::Yes );
     buttons->addButton( QDialogButtonBox::Cancel );
     buttons->button( QDialogButtonBox::Ok )->setText( tr("登录") );
+    buttons->button( QDialogButtonBox::Yes )->setText( tr("注册") );
     buttons->button( QDialogButtonBox::Cancel )->setText( tr("退出") );
 
     // connects slots
@@ -53,6 +62,8 @@ void LoginDialog::setUpGUI()
 
     connect( buttons->button( QDialogButtonBox::Ok ), SIGNAL(clicked()), this,
              SLOT(slotAcceptLogin()) );
+    connect( buttons->button( QDialogButtonBox::Yes ), SIGNAL(clicked()), this,
+             SLOT(registerUser()) );
 
     noticeLabel = new QLabel(tr("密码不对或用户不存在"));
     QFont font;
@@ -68,7 +79,9 @@ void LoginDialog::setUpGUI()
     formGridLayout->addWidget( editUsername, 1, 1 );
     formGridLayout->addWidget( labelPassword, 2, 0 );
     formGridLayout->addWidget( editPassword, 2, 1 );
-    formGridLayout->addWidget( buttons, 3, 0, 1, 2 );
+    formGridLayout->addWidget( labelEnsurePassword, 3, 0 );
+    formGridLayout->addWidget( ensurePassword, 3, 1 );
+    formGridLayout->addWidget( buttons, 4, 1, 1, 3 );
 
     setLayout( formGridLayout );
 
@@ -108,5 +121,45 @@ void LoginDialog::storeUsernameToSetting(const QString& username)
 
     setting.setValue("username", sessionUser.toBase64(QByteArray::Base64Encoding));
     qDebug() << QByteArray::fromBase64(setting.value("username").toByteArray()).data();
+}
+
+void LoginDialog::registerUser()
+{
+    if (buttons->button(QDialogButtonBox::Yes)->text() == tr("注册")) {
+        buttons->button(QDialogButtonBox::Yes)->setText(tr("确认"));
+        buttons->button(QDialogButtonBox::Ok)->setVisible(false);
+        ensurePassword->setVisible(true);
+        labelEnsurePassword->setVisible(true);
+        return;
+    }
+
+    QString username = editUsername->text();
+    QString password = editPassword->text();
+    QString passwordRepeated = ensurePassword->text();
+    if (passwordRepeated != password) {
+        noticeLabel->setText(tr("密码不对应啊"));
+        noticeLabel->setVisible(true);
+        return;
+    }
+
+    bool isRegistered = canRegister(username, password);
+    if (isRegistered) {
+        storeUsernameToSetting(username);
+        // close this dialog with QDialog::Accepted
+        accept();
+    }
+    else {
+        editPassword->clear();
+        noticeLabel->setText(tr("注册失败，需要有网络"));
+        noticeLabel->setVisible(true);
+    }
+}
+
+bool LoginDialog::canRegister(const QString& username, const QString& password)
+{
+    if (username == "a" && password == "b") {
+        return true;
+    }
+    return false;
 }
 

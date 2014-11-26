@@ -23,13 +23,16 @@ private:
 
         QLabel* labelUsername;
         QLabel* labelPassword;
+        QLabel* labelEnsurePassword;
         QLabel* noticeLabel;
         QLineEdit* editUsername;
         QLineEdit* editPassword;
+        QLineEdit* ensurePassword;
         QDialogButtonBox* buttons;
 
         void setUpGUI();
         bool canLogin(const QString& username, const QString& password);
+        bool canRegister(const QString& username, const QString& password);
         void storeUsernameToSetting(const QString& username);
 
 public:
@@ -41,6 +44,7 @@ public:
 
 public slots:
     void slotAcceptLogin();
+    void registerUser();
 };
 
 #endif // LOGINDIALOG_H

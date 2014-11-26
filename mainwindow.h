@@ -1,13 +1,15 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QPushButton>
+#include <QAction>
 #include <QGridLayout>
 #include <QLabel>
+#include <QLineEdit>
 #include <QListView>
 #include <QMainWindow>
+#include <QMenu>
 #include <QSettings>
-#include <QVBoxLayout>
+#include <QToolBar>
 
 class MainWindow : public QMainWindow
 {
@@ -20,14 +22,28 @@ public:
     void setUsername(const QString& username);
 
 private:
+    void refreshLastUpdateTime();
+
     QString username;
     // set layout to QMainWindow
     QWidget *centralWidget;
     QSettings settings;
 
-    QVBoxLayout *toolbarLayout;
+    QToolBar *toolbar;
     QLabel *usernameLabel;
-    QPushButton *settingButton;
+    QAction *settingAction;
+
+    QMenu *sortMenu;
+    QAction *sortBySaveTime;
+    QAction *sortByCreatedTime;
+    QAction *sortByRemainder;
+
+    QAction *newAction;
+    QLineEdit *searchEdit;
+    QAction *clearSearchResultAction;
+
+    QAction *updateAction;
+    QLabel *lastUpdateLabel;
 
     QListView *journalListView;
 
