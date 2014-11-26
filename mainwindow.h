@@ -19,9 +19,17 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     void setUpGUI();
+    /**
+     * @brief setUsername
+     * @param username 给主窗口一个用户名，在主窗口显示之前，先获取用户名（从本地设置或者用户输入），再把用户名传递给它
+     */
     void setUsername(const QString& username);
 
 private:
+    /**
+     * @brief refreshLastUpdateTime
+     * 更新最近一次更新的时间，会修改相关的UI
+     */
     void refreshLastUpdateTime();
 
     QString username;
