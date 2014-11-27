@@ -118,8 +118,12 @@ void MainWindow::setUpGUI()
 
 void MainWindow::refreshLastUpdateTime()
 {
+    qDebug() << "before lastupdatetime: " << settings.value("lastupdatetime").toString();
     lastUpdateTime = QDateTime::currentDateTime();
-    lastUpdateLabel->setText(lastUpdateTime.toString("yyyy.MM.dd.hh.mm"));
+    QString lastupdatetime = lastUpdateTime.toString("yyyy.MM.dd.hh.mm");
+    lastUpdateLabel->setText(lastupdatetime);
+    settings.setValue("lastupdatetime", lastupdatetime);
+    qDebug() << "after lastupdatetime: " << settings.value("lastupdatetime").toString();
 }
 
 void MainWindow::enableClearSearch(const QString& text)

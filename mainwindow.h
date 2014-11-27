@@ -40,8 +40,17 @@ private:
     QDateTime lastUpdateTime;
 
     QString username;
-    // set layout to QMainWindow
+    /**
+     * set layout to QMainWindow
+     */
     QWidget *centralWidget;
+    /**
+     *  配置名: 组织名 ScheduleKeeper 程序名 ScheduleKeeper
+     *  当前保存的项目：
+     *  1. username
+     *  2. autoupdate
+     *  3. lastupdatetime
+     */
     QSettings settings;
     SettingsDialog settingsDialog;
 
