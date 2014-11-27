@@ -16,11 +16,15 @@ QMAKE_CXXFLAGS += -std=c++11
 SOURCES += main.cpp\
         mainwindow.cpp \
     logindialog.cpp \
-    settingsdialog.cpp
+    settingsdialog.cpp \
+    editjournalpanel.cpp \
+    localjournal.cpp
 
 HEADERS  += mainwindow.h \
     logindialog.h \
     global.h \
-    settingsdialog.h
+    settingsdialog.h \
+    editjournalpanel.h \
+    localjournal.h
 
 FORMS    +=
