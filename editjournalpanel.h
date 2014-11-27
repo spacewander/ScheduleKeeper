@@ -21,41 +21,34 @@ class EditJournalPanel : public QWidget
 public:
     explicit EditJournalPanel(QWidget *parent = 0);
     ~EditJournalPanel();
-    void editLocalJournal(LocalJournal& journal);
+    void editLocalJournal(const LocalJournal& journal);
 
 signals:
     void deleteLocalJournal(const QString& journalID);
-    LocalJournal& saveLocalJournal();
-    LocalJournal& createLocalJournal();
+    void saveLocalJournal(const LocalJournal& journal);
+    void createLocalJournal(const LocalJournal& journal);
 
 private:
     void showAlarmEdit();
-    /**
-     * @brief setAlarm
-     * @param datetime
-     *
-     * set alarm and turn isRemainded to true
-     */
-    void setAlarm(const QDateTime& datetime);
+
     void deleteJournal();
+    /**
+     * @brief initEditState
+     */
+    void initEditState();
     void saveJournal();
     void createJournal();
 
-    QString journalID;
+    LocalJournal editingJournal;
 
-    /**
-     * @brief alarm
-     * store current alarm time, if not given, use current time instead
-     */
-    QDateTime *alarm;
     QDateTimeEdit *alarmEdit;
-    bool isRemainded;
 
     QPushButton *saveBtn;
     QPushButton *deleteBtn;
     QPushButton *alarmBtn;
 
     QPlainTextEdit *detailEdit;
+    QVBoxLayout *mainLayout;
 };
 
 #endif // EDITJOURNALPANEL_H
