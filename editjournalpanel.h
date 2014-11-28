@@ -3,6 +3,7 @@
 
 #include <QDateTime>
 #include <QDateTimeEdit>
+#include <QLabel>
 #include <QPlainTextEdit>
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -50,6 +51,7 @@ private:
     QPushButton *deleteBtn;
     QPushButton *alarmBtn;
 
+    QLabel *detailLabel;
     QPlainTextEdit *detailEdit;
     QVBoxLayout *mainLayout;
 };

@@ -114,6 +114,8 @@ void MainWindow::setUpGUI()
 
     journalListView = new QListView(this);
     editJournalPanel = new EditJournalPanel(this);
+    editJournalPanel->setFocus();
+    connectEditJournalPanel();
 
     mainLayout->addWidget(journalListView, 0, 0);
     mainLayout->addWidget(editJournalPanel, 0, 1);

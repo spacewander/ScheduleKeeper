@@ -5,7 +5,7 @@
 void logDeleteLocalJournal(const LocalJournal& journal)
 {
     qDebug() << "delete localjournal: journalID " << journal.journalID;
-    if (!journal.isDeleted) {
+    if (!journal.deleted) {
         qDebug() << "Error: isDeleted has not been set to true";
     }
 }
@@ -32,7 +32,8 @@ void logCreateLocalJournal(const LocalJournal& journal)
 
 LocalJournal::LocalJournal()
 {
-    isDeleted = true;
+    deleted = true;
+    willAlarm = false;
     journalID = "";
 }
 
@@ -54,12 +55,19 @@ LocalJournal::LocalJournal(const QString& journalID, const QDateTime& ctime,
 
 void LocalJournal::clear()
 {
-    isDeleted = true;
+    deleted = true;
     detail = "";
     willAlarm = false;
     alarmTime = QDateTime();
     saveTime = QDateTime();
     createdTime = QDateTime();
     journalID = "";
+}
+
+void LocalJournal::generalizeID()
+{
+    QDateTime current = QDateTime::currentDateTimeUtc();
+    journalID = QString::number(
+                QDateTime(QDate(1970, 1, 1), QTime(0, 0)).secsTo(current));
 }
 

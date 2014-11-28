@@ -18,16 +18,26 @@ public:
     LocalJournal(const QString& journalID, const QDateTime& ctime,
                  const QDateTime& mtime, const QString& detail,
                  const QDateTime& alarmTime);
+    /**
+     * @brief clear
+     * 清理LocalJournal的状态到默认构造函数构造的状态
+     */
     void clear();
+    /**
+     * @brief generalizeID
+     * 生成的ID为当前时间到1970年1月1日0时0分的秒数，类型为QString
+     */
+    void generalizeID();
 
     QString  detail;
     QDateTime alarmTime;
     bool willAlarm;
+    // a timestamp from 1970-01-01 or ""
     QString journalID;
     QDateTime saveTime;
     QDateTime createdTime;
 
-    bool isDeleted;
+    bool deleted;
 };
 
 void logDeleteLocalJournal(const LocalJournal& journal);
