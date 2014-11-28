@@ -1,4 +1,5 @@
 #include <QDebug>
+#include <QIcon>
 #include <QToolButton>
 
 #include "mainwindow.h"
@@ -15,6 +16,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // set up all the core data
     lastUpdateTime = QDateTime::currentDateTime();
+
+    QIcon icon = QIcon(":/rs/alarm-512.png");
+    setWindowIcon(icon);
 }
 
 MainWindow::~MainWindow()
@@ -25,6 +29,14 @@ MainWindow::~MainWindow()
 void MainWindow::setUsername(const QString& username)
 {
     this->username = username;
+}
+
+void MainWindow::setup()
+{
+    setUpGUI();
+    setUpJournals();
+    showMaximized();
+    updateJournals();
 }
 
 void MainWindow::setUpGUI()
@@ -120,6 +132,17 @@ void MainWindow::setUpGUI()
     mainLayout->addWidget(journalListView, 0, 0);
     mainLayout->addWidget(editJournalPanel, 0, 1);
     
+}
+
+void MainWindow::setUpJournals()
+{
+    journalListView->setModel(&journalList);
+    journalListView->setWordWrap(true);
+    journalListView->setSpacing(1);
+}
+
+void MainWindow::updateJournals()
+{
 }
 
 void MainWindow::refreshLastUpdateTime()

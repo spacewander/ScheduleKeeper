@@ -2,6 +2,8 @@
 
 #include "localjournal.h"
 
+const int detailDisplayLength = 70;
+
 void logDeleteLocalJournal(const LocalJournal& journal)
 {
     qDebug() << "delete localjournal: journalID " << journal.journalID;
@@ -42,6 +44,7 @@ LocalJournal::LocalJournal(const QString& journalID, const QDateTime& ctime,
     : detail(detail), journalID(journalID), saveTime(mtime), 
     createdTime(ctime)
 {
+    willAlarm = false;
 }
 
 LocalJournal::LocalJournal(const QString& journalID, const QDateTime& ctime,
@@ -69,5 +72,18 @@ void LocalJournal::generalizeID()
     QDateTime current = QDateTime::currentDateTimeUtc();
     journalID = QString::number(
                 QDateTime(QDate(1970, 1, 1), QTime(0, 0)).secsTo(current));
+}
+
+const QString LocalJournal::getAlarm() const
+{
+    return alarmTime.toString("yy年MM月dd日hh：mm");
+}
+
+const QString LocalJournal::getDetail() const
+{
+    if (detail.size() > detailDisplayLength) {
+        return detail.left(detailDisplayLength) + "...";
+    }
+    return detail;
 }
 

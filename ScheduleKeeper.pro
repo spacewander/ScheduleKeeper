@@ -18,14 +18,16 @@ SOURCES += main.cpp\
     logindialog.cpp \
     settingsdialog.cpp \
     editjournalpanel.cpp \
-    localjournal.cpp
+    localjournal.cpp \
+    journallistmodel.cpp
 
 HEADERS  += mainwindow.h \
     logindialog.h \
     global.h \
     settingsdialog.h \
     editjournalpanel.h \
-    localjournal.h
+    localjournal.h \
+    journallistmodel.h
 
 FORMS    +=
 

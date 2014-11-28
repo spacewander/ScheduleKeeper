@@ -13,6 +13,7 @@
 #include <QToolBar>
 
 #include "settingsdialog.h"
+#include "journallistmodel.h"
 
 class LocalJournal;
 class EditJournalPanel;
@@ -24,7 +25,8 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    void setUpGUI();
+    void setup();
+
     /**
      * @brief setUsername
      * @param username 给主窗口一个用户名，在主窗口显示之前，先获取用户名（从本地设置或者用户输入），再把用户名传递给它
@@ -40,6 +42,9 @@ private slots:
     void enableClearSearch(const QString &text);
 
 private:
+    void setUpGUI();
+    void setUpJournals();
+    void updateJournals();
     void connectEditJournalPanel();
 
     /**
@@ -81,6 +86,8 @@ private:
     QLabel *lastUpdateLabel;
 
     QListView *journalListView;
+    // listModel for journalListView
+    JournalListModel journalList;
     EditJournalPanel *editJournalPanel;
 
     QGridLayout *mainLayout;

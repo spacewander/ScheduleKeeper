@@ -28,6 +28,8 @@ public:
      * 生成的ID为当前时间到1970年1月1日0时0分的秒数，类型为QString
      */
     void generalizeID();
+    const QString getAlarm() const;
+    const QString getDetail() const;
 
     QString  detail;
     QDateTime alarmTime;

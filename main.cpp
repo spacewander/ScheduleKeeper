@@ -36,16 +36,13 @@ int main(int argc, char *argv[])
     const QString currentUser = extractUsername(hasCurrentUser);
     if (hasCurrentUser) {
         w.setUsername(currentUser);
-        w.setUpGUI();
-        w.showMaximized();
+        w.setup();
     }
     else {
         LoginDialog loginDialog;
         loginDialog.bindMainwindow(&w);
         if (loginDialog.exec() == QDialog::Accepted) {
-            //w.show();
-            w.setUpGUI();
-            w.showMaximized();
+            w.setup();
         }
         else {
             w.close();

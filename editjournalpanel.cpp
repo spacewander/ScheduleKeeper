@@ -115,7 +115,6 @@ void EditJournalPanel::createJournal()
         editingJournal.willAlarm = true;
         editingJournal.alarmTime = alarmEdit->dateTime();
     }
-    logCreateLocalJournal(editingJournal);
     emit createLocalJournal(editingJournal);
 }
 

@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>rs/alarm-512.png</file>
+        <file>rs/null.png</file>
     </qresource>
 </RCC>
