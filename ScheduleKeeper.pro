@@ -28,3 +28,6 @@ HEADERS  += mainwindow.h \
     localjournal.h
 
 FORMS    +=
+
+RESOURCES += \
+    ScheduleKeeper.qrc

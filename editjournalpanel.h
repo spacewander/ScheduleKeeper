@@ -8,7 +8,7 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-class LocalJournal;
+#include "localjournal.h"
 
 /**
  * @brief The EditJournalPanel class
@@ -28,12 +28,15 @@ signals:
     void saveLocalJournal(const LocalJournal& journal);
     void createLocalJournal(const LocalJournal& journal);
 
-private:
+private slots:
     void showAlarmEdit();
 
     void deleteJournal();
+
+private:
     /**
      * @brief initEditState
+     * 初始化面板到创建/编辑日程之前的状态
      */
     void initEditState();
     void saveJournal();

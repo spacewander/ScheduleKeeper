@@ -2,6 +2,8 @@
 #include <QToolButton>
 
 #include "mainwindow.h"
+#include "editjournalpanel.h"
+#include "localjournal.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -111,8 +113,10 @@ void MainWindow::setUpGUI()
     toolbar->addSeparator();
 
     journalListView = new QListView(this);
+    editJournalPanel = new EditJournalPanel(this);
 
     mainLayout->addWidget(journalListView, 0, 0);
+    mainLayout->addWidget(editJournalPanel, 0, 1);
     
 }
 
@@ -134,5 +138,30 @@ void MainWindow::enableClearSearch(const QString& text)
     else {
         clearSearchResultAction->setEnabled(false);
     }
+}
+
+void MainWindow::connectEditJournalPanel()
+{
+    connect(editJournalPanel, SIGNAL(saveLocalJournal(LocalJournal)),
+                this, SLOT(saveLocalJournal(LocalJournal)));
+    connect(editJournalPanel, SIGNAL(createLocalJournal(LocalJournal)),
+            this, SLOT(createLocalJournal(LocalJournal)));
+    connect(editJournalPanel, SIGNAL(deleteLocalJournal(QString)),
+            this, SLOT(deleteLocalJournal(QString)));
+}
+
+void MainWindow::deleteLocalJournal(const QString& journalID)
+{
+    qDebug() << "delete localjournal: " << journalID;
+}
+ 
+void MainWindow::saveLocalJournal(const LocalJournal& journal)
+{
+    logSaveLocalJournal(journal);
+}
+
+void MainWindow::createLocalJournal(const LocalJournal& journal)
+{
+    logCreateLocalJournal(journal);
 }
 

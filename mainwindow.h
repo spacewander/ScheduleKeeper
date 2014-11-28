@@ -15,6 +15,7 @@
 #include "settingsdialog.h"
 
 class LocalJournal;
+class EditJournalPanel;
 
 class MainWindow : public QMainWindow
 {
@@ -32,13 +33,15 @@ public:
 
 public slots:
     void deleteLocalJournal(const QString& journalID);
-    LocalJournal& saveLocalJournal();
-    LocalJournal& createLocalJournal();
+    void saveLocalJournal(const LocalJournal&);
+    void createLocalJournal(const LocalJournal&);
 
 private slots:
     void enableClearSearch(const QString &text);
 
 private:
+    void connectEditJournalPanel();
+
     /**
      * @brief refreshLastUpdateTime
      * 更新最近一次更新的时间，会修改相关的UI
@@ -78,6 +81,7 @@ private:
     QLabel *lastUpdateLabel;
 
     QListView *journalListView;
+    EditJournalPanel *editJournalPanel;
 
     QGridLayout *mainLayout;
 };
