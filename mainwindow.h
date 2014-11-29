@@ -39,6 +39,7 @@ public slots:
     void deleteLocalJournal(const QString& journalID);
     void saveLocalJournal(const LocalJournal&);
     void createLocalJournal(const LocalJournal&);
+    void logout();
 
 private slots:
     void enableClearSearch(const QString &text);
@@ -85,7 +86,9 @@ private:
     SettingsDialog settingsDialog;
 
     QToolBar *toolbar;
+    QAction *logoutAction;
     QLabel *usernameLabel;
+
     QAction *settingAction;
 
     QMenu *sortMenu;

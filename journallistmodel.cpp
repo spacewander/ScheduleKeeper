@@ -54,7 +54,6 @@ bool JournalListModel::removeJournalWithID(const QString& journalID)
     auto end = journals.end();
     for (auto it = journals.begin(); it != end; it++) {
         if ((*it).journalID == journalID) {
-            logSaveLocalJournal((*it));
             journals.erase(it);
             return true;
         }

@@ -1,10 +1,11 @@
 #include <QDebug>
 #include <QIcon>
 #include <QToolButton>
-#include <QtSql/QSqlQuery>
+#include <QtSql>
 
 #include "mainwindow.h"
 #include "editjournalpanel.h"
+#include "logindialog.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -37,7 +38,10 @@ void MainWindow::setup()
     setUpGUI();
     setUpJournals();
     showMaximized();
-    updateJournals();
+    const bool selected = settings.value("autoupdate", true).toBool();
+    if (selected) {
+        updateJournals();
+    }
 }
 
 void MainWindow::setUpGUI()
@@ -62,10 +66,12 @@ void MainWindow::setUpGUI()
             background: rgba(255,255,255,1);\
             }");
 
-    QLabel *leftMargin = new QLabel("");
-    leftMargin->setMinimumWidth(50);
+    qDebug() << "username: " << username;
     usernameLabel = new QLabel(username);
+    usernameLabel->setAlignment(Qt::AlignCenter);
     usernameLabel->setMinimumWidth(200);
+    logoutAction = new QAction(tr("登出"), this);
+    connect(logoutAction, SIGNAL(triggered()), this, SLOT(logout()));
 
     settingAction = new QAction(tr("更改设置"), this);
     connect(settingAction, SIGNAL(triggered()), &settingsDialog, SLOT(exec()));
@@ -114,8 +120,9 @@ void MainWindow::setUpGUI()
     lastUpdateLabel->setAlignment(Qt::AlignCenter);
     
 
-    toolbar->addWidget(leftMargin);
     toolbar->addWidget(usernameLabel);
+    toolbar->addSeparator();
+    toolbar->addAction(logoutAction);
     toolbar->addSeparator();
     toolbar->addAction(settingAction);
     toolbar->addSeparator();
@@ -147,6 +154,7 @@ void MainWindow::setUpJournals()
     connect(journalListView, SIGNAL(clicked(const QModelIndex&)), 
             this, SLOT(getJournalWithIndex(const QModelIndex&)));
 
+    totalLocalJournals.clear();
     // test data begin
     QString testDetail = "生活就像海洋，只有意志坚强的人才能到达彼岸。";
     LocalJournal test1("111111", QDateTime(QDate(2014, 7, 28), QTime(23, 10)),
@@ -247,5 +255,25 @@ void MainWindow::createLocalJournal(const LocalJournal& journal)
         qDebug() << "can not create journalID: " << journal.journalID;
     }
     journalListView->reset();
+}
+
+void MainWindow::logout()
+{
+    this->hide();
+    LoginDialog loginDialog;
+    loginDialog.bindMainwindow(this);
+    if (loginDialog.exec() == QDialog::Accepted) {
+        usernameLabel->setText(username);
+        searchEdit->clear();
+        setUpJournals();
+        const bool selected = settings.value("autoupdate", true).toBool();
+        if (selected) {
+            updateJournals();
+        }
+        showMaximized();
+    }
+    else {
+        show();
+    }
 }
 
