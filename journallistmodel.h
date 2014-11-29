@@ -16,17 +16,19 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role) const;
     int rowCount(const QModelIndex &parent) const;
     /**
-     * @brief removeRow
+     * @brief removeJournalWithID
      * called when journal is deleted
      */
-    bool removeRow(int row, const QModelIndex &parent = QModelIndex());
+    bool removeJournalWithID(const QString& journalID);
     /**
-     * @brief updateJournalAtRow
+     * @brief updateJournal
      * update specific row with new journal data
      */
-    bool updateJournalAtRow(int row, const LocalJournal& journal);
+    bool updateJournal(const LocalJournal& journal);
     bool addJournal(const LocalJournal& journal);
     void setJournals(const QList<LocalJournal>& journals);
+
+    const LocalJournal& at(const unsigned int row) const;
 
 signals:
 

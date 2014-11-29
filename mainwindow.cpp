@@ -5,7 +5,6 @@
 
 #include "mainwindow.h"
 #include "editjournalpanel.h"
-#include "localjournal.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -20,6 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QIcon icon = QIcon(":/rs/alarm-512.png");
     setWindowIcon(icon);
+    isSearched = false;
 }
 
 MainWindow::~MainWindow()
@@ -83,7 +83,7 @@ void MainWindow::setUpGUI()
     popupBtn->setPopupMode(QToolButton::InstantPopup);
 
     newAction = new QAction(tr("创建新日程"), this);
-    connect(newAction, SIGNAL(triggered()), editJournalPanel, SLOT(startNewJournal()));
+    connect(newAction, SIGNAL(triggered()), this, SLOT(startNewJournal()));
 
     searchEdit = new QLineEdit(this);
     searchEdit->setPlaceholderText(tr(" 搜索一下"));
@@ -98,7 +98,7 @@ void MainWindow::setUpGUI()
     connect(searchEdit, SIGNAL(textEdited(const QString &)), 
             this, SLOT(enableClearSearch(const QString &)));
     connect(clearSearchResultAction, SIGNAL(triggered()), 
-            searchEdit, SLOT(clear()));
+            this, SLOT(switchSearchToDisplay()));
     connect(clearSearchResultAction, &QAction::triggered, [&]() {
             clearSearchResultAction->setEnabled(false);
     });
@@ -106,6 +106,7 @@ void MainWindow::setUpGUI()
     QLabel *rightMargin = new QLabel("");
     rightMargin->setMinimumWidth(50);
     updateAction = new QAction(tr("同步"), this);
+    connect(updateAction, SIGNAL(triggered()), this, SLOT(updateJournals()));
     QString lastUpdateTime(tr("尚未同步"));
     settings.value("lastUpdateTime", lastUpdateTime);
     lastUpdateLabel = new QLabel(lastUpdateTime);
@@ -139,23 +140,25 @@ void MainWindow::setUpGUI()
 
 void MainWindow::setUpJournals()
 {
+    editingRow = 0;
     journalListView->setModel(&journalList);
     journalListView->setWordWrap(true);
     journalListView->setSpacing(1);
+    connect(journalListView, SIGNAL(clicked(const QModelIndex&)), 
+            this, SLOT(getJournalWithIndex(const QModelIndex&)));
 
-    QList<LocalJournal> journals;
     // test data begin
     QString testDetail = "生活就像海洋，只有意志坚强的人才能到达彼岸。";
     LocalJournal test1("111111", QDateTime(QDate(2014, 7, 28), QTime(23, 10)),
                        QDateTime(QDate(2014, 11, 27), QTime(22, 18)), testDetail);
     QString test2Detail = "Ent_evo #imaginature# 一个世纪过去了，蚯蚓的王国又向大地的尽头前进了一公里。它们不急。从来都不急。";
-    LocalJournal test2("111111", QDateTime(QDate(2014, 10, 28), QTime(3, 10)),
+    LocalJournal test2("111112", QDateTime(QDate(2014, 10, 28), QTime(3, 10)),
                        QDateTime(QDate(2014, 11, 27), QTime(12, 48)), test2Detail,
                        QDateTime(QDate(2014, 12, 1), QTime(12, 0)));
-    journals.push_back(test1);
-    journals.push_back(test2);
+    totalLocalJournals.push_back(test1);
+    totalLocalJournals.push_back(test2);
     // test data end
-    journalList.setJournals(journals);
+    journalList.setJournals(totalLocalJournals);
 }
 
 void MainWindow::updateJournals()
@@ -182,6 +185,29 @@ void MainWindow::enableClearSearch(const QString& text)
     }
 }
 
+// 每次点击时，都应该修改editingRow参数。
+void MainWindow::getJournalWithIndex(const QModelIndex& index)
+{
+    if (!index.isValid()) {
+        return;
+    }
+    editingRow = index.row();
+    editJournalPanel->editLocalJournal(journalList.at(editingRow));
+}
+
+void MainWindow::startNewJournal()
+{
+    switchSearchToDisplay();
+    editJournalPanel->startNewJournal();
+}
+
+void MainWindow::switchSearchToDisplay()
+{
+    isSearched = false;
+    searchEdit->clear();
+    clearSearchResultAction->setEnabled(false);
+}
+
 void MainWindow::connectEditJournalPanel()
 {
     connect(editJournalPanel, SIGNAL(saveLocalJournal(LocalJournal)),
@@ -195,15 +221,31 @@ void MainWindow::connectEditJournalPanel()
 void MainWindow::deleteLocalJournal(const QString& journalID)
 {
     qDebug() << "delete localjournal: " << journalID;
+    // update where journalID = xxx ...
+    if (!journalList.removeJournalWithID(journalID)) {
+        qDebug() << "can not delete journalID: " << journalID;
+    }
+    journalListView->reset();
 }
  
 void MainWindow::saveLocalJournal(const LocalJournal& journal)
 {
     logSaveLocalJournal(journal);
+    // update where journalID = xxx.journalID
+    if (!journalList.updateJournal(journal)) {
+        qDebug() << "can not save journalID: " << journal.journalID;
+    }
+    journalListView->reset();
 }
 
 void MainWindow::createLocalJournal(const LocalJournal& journal)
 {
+    editingRow = 0;
     logCreateLocalJournal(journal);
+    // insert with ...
+    if (!journalList.addJournal(journal)) {
+        qDebug() << "can not create journalID: " << journal.journalID;
+    }
+    journalListView->reset();
 }
 

@@ -45,6 +45,7 @@ LocalJournal::LocalJournal(const QString& journalID, const QDateTime& ctime,
     createdTime(ctime)
 {
     willAlarm = false;
+    deleted = false;
 }
 
 LocalJournal::LocalJournal(const QString& journalID, const QDateTime& ctime,

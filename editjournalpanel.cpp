@@ -60,6 +60,9 @@ void EditJournalPanel::editLocalJournal(const LocalJournal& journal)
         alarmEdit->setVisible(true);
         alarmEdit->setDateTime(journal.alarmTime);
     }
+    else {
+        alarmEdit->setVisible(false);
+    }
     detailEdit->setPlainText(journal.detail);
 }
 
@@ -84,9 +87,9 @@ void EditJournalPanel::deleteJournal()
 {
     // if there is journal editing
     if (!editingJournal.deleted) {
+        emit deleteLocalJournal(editingJournal.journalID);
         editingJournal.clear();
         initEditState();
-        emit deleteLocalJournal(editingJournal.journalID);
     }
 }
 
@@ -106,6 +109,9 @@ void EditJournalPanel::saveJournal()
     if (alarmEdit->isVisible()) {
         editingJournal.willAlarm = true;
         editingJournal.alarmTime = alarmEdit->dateTime();
+    }
+    else {
+        editingJournal.willAlarm = false;
     }
     editingJournal.saveTime = QDateTime::currentDateTime();
     emit saveLocalJournal(editingJournal);

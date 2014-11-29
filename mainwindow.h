@@ -6,6 +6,7 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QLineEdit>
+#include <QList>
 #include <QListView>
 #include <QMainWindow>
 #include <QMenu>
@@ -13,6 +14,7 @@
 #include <QToolBar>
 
 #include "settingsdialog.h"
+#include "localjournal.h"
 #include "journallistmodel.h"
 
 class LocalJournal;
@@ -40,11 +42,24 @@ public slots:
 
 private slots:
     void enableClearSearch(const QString &text);
+    /**
+     * 获取ListView中的index对应的LocalJournal数据，并存储到EditJournalPanel中
+     * 额外存row到editingRow成员变量中，作为对应的操作的连接
+     */
+    void getJournalWithIndex(const QModelIndex &index);
+    /**
+     *  清除搜索框的内容，并将EditJournalPanel设置为创建日程的状态
+     */
+    void startNewJournal();
+    /**
+     * 清除搜索信息，展示所有的LocalJournal
+     */
+    void switchSearchToDisplay();
+    void updateJournals();
 
 private:
     void setUpGUI();
     void setUpJournals();
-    void updateJournals();
     void connectEditJournalPanel();
 
     /**
@@ -77,17 +92,36 @@ private:
     QAction *sortBySaveTime;
     QAction *sortByCreatedTime;
     QAction *sortByRemainder;
+    enum SortBy {
+        SortBySaveTime,
+        SortByCreatedTime,
+        SortByRemainder,
+    };
 
     QAction *newAction;
     QLineEdit *searchEdit;
+    bool isSearched;
     QAction *clearSearchResultAction;
 
     QAction *updateAction;
     QLabel *lastUpdateLabel;
 
+    /**
+     *  展示全部的LocalJournal（排列顺序会不同），或展示符合筛选要求的LocalJournal
+     */
     QListView *journalListView;
     // listModel for journalListView
     JournalListModel journalList;
+
+    /**
+     *  作为各种对ListModel的操作的连接（因为这些操作都需要有一个row参数）
+     */
+    int editingRow;
+    QList<LocalJournal> totalLocalJournals;
+
+    /**
+     * 编辑LocalJournal的面板
+     */
     EditJournalPanel *editJournalPanel;
 
     QGridLayout *mainLayout;

@@ -49,13 +49,17 @@ int JournalListModel::rowCount(const QModelIndex &parent) const
     return 0;
 }
 
-bool JournalListModel::removeRow(int row, const QModelIndex &parent)
+bool JournalListModel::removeJournalWithID(const QString& journalID)
 {
-    if (parent.isValid())
-        return false;
-
-    journals.removeAt(row);
-    return true;
+    auto end = journals.end();
+    for (auto it = journals.begin(); it != end; it++) {
+        if ((*it).journalID == journalID) {
+            logSaveLocalJournal((*it));
+            journals.erase(it);
+            return true;
+        }
+    }
+    return false;
 }
 
 bool JournalListModel::addJournal(const LocalJournal& journal)
@@ -64,14 +68,25 @@ bool JournalListModel::addJournal(const LocalJournal& journal)
     return true;
 }
 
-bool JournalListModel::updateJournalAtRow(int row, const LocalJournal &journal)
+bool JournalListModel::updateJournal(const LocalJournal &journal)
 {
-    journals[row] = journal;
-    return true;
+    auto end = journals.end();
+    for (auto it = journals.begin(); it != end; it++) {
+        if ((*it).journalID == journal.journalID) {
+            *it = journal;
+            return true;
+        }
+    }
+    return false;
 }
 
 void JournalListModel::setJournals(const QList<LocalJournal>& journals)
 {
     this->journals = journals;
+}
+
+const LocalJournal& JournalListModel::at(const unsigned int row) const
+{
+    return journals.at(row);
 }
 
