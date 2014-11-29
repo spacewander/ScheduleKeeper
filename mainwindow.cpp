@@ -1,6 +1,7 @@
 #include <QDebug>
 #include <QIcon>
 #include <QToolButton>
+#include <QtSql/QSqlQuery>
 
 #include "mainwindow.h"
 #include "editjournalpanel.h"
@@ -47,6 +48,11 @@ void MainWindow::setUpGUI()
     // 第二列为日程编辑界面
     mainLayout = new QGridLayout(centralWidget);
 
+    journalListView = new QListView(this);
+    editJournalPanel = new EditJournalPanel(this);
+    editJournalPanel->setFocus();
+    connectEditJournalPanel();
+
     toolbar = addToolBar("");
     toolbar->setMovable(false);
     toolbar->setFloatable(false);
@@ -77,6 +83,8 @@ void MainWindow::setUpGUI()
     popupBtn->setPopupMode(QToolButton::InstantPopup);
 
     newAction = new QAction(tr("创建新日程"), this);
+    connect(newAction, SIGNAL(triggered()), editJournalPanel, SLOT(startNewJournal()));
+
     searchEdit = new QLineEdit(this);
     searchEdit->setPlaceholderText(tr(" 搜索一下"));
     // 清除编辑框上的自动聚焦
@@ -124,11 +132,6 @@ void MainWindow::setUpGUI()
     toolbar->addWidget(lastUpdateLabel);
     toolbar->addSeparator();
 
-    journalListView = new QListView(this);
-    editJournalPanel = new EditJournalPanel(this);
-    editJournalPanel->setFocus();
-    connectEditJournalPanel();
-
     mainLayout->addWidget(journalListView, 0, 0);
     mainLayout->addWidget(editJournalPanel, 0, 1);
     
@@ -139,6 +142,20 @@ void MainWindow::setUpJournals()
     journalListView->setModel(&journalList);
     journalListView->setWordWrap(true);
     journalListView->setSpacing(1);
+
+    QList<LocalJournal> journals;
+    // test data begin
+    QString testDetail = "生活就像海洋，只有意志坚强的人才能到达彼岸。";
+    LocalJournal test1("111111", QDateTime(QDate(2014, 7, 28), QTime(23, 10)),
+                       QDateTime(QDate(2014, 11, 27), QTime(22, 18)), testDetail);
+    QString test2Detail = "Ent_evo #imaginature# 一个世纪过去了，蚯蚓的王国又向大地的尽头前进了一公里。它们不急。从来都不急。";
+    LocalJournal test2("111111", QDateTime(QDate(2014, 10, 28), QTime(3, 10)),
+                       QDateTime(QDate(2014, 11, 27), QTime(12, 48)), test2Detail,
+                       QDateTime(QDate(2014, 12, 1), QTime(12, 0)));
+    journals.push_back(test1);
+    journals.push_back(test2);
+    // test data end
+    journalList.setJournals(journals);
 }
 
 void MainWindow::updateJournals()

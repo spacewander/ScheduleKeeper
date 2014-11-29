@@ -17,7 +17,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
         autoUpdateRadioBtn->setChecked(true);
     }
     else {
-        manualUpdateRadioBtn->setChecked(false);
+        manualUpdateRadioBtn->setChecked(true);
     }
 
     QHBoxLayout *groupBoxLayout = new QHBoxLayout(this);

@@ -1,14 +1,12 @@
 #include <QDateTime>
 #include <QDebug>
 #include <QIcon>
-#include <QtSql/QSqlQuery>
 
 #include "journallistmodel.h"
 
 JournalListModel::JournalListModel(QObject *parent) :
     QAbstractListModel(parent)
 {
-    fillJournalsList();
 }
 
 QVariant JournalListModel::data(const QModelIndex &index, int role) const
@@ -60,23 +58,20 @@ bool JournalListModel::removeRow(int row, const QModelIndex &parent)
     return true;
 }
 
-bool JournalListModel::updateRow(int row, LocalJournal &journal)
+bool JournalListModel::addJournal(const LocalJournal& journal)
+{
+    journals.push_front(journal);
+    return true;
+}
+
+bool JournalListModel::updateJournalAtRow(int row, const LocalJournal &journal)
 {
     journals[row] = journal;
     return true;
 }
 
-void JournalListModel::fillJournalsList()
+void JournalListModel::setJournals(const QList<LocalJournal>& journals)
 {
-    // test data begin
-    QString testDetail = "生活就像海洋，只有意志坚强的人才能到达彼岸。";
-    LocalJournal test1("111111", QDateTime(QDate(2014, 7, 28), QTime(23, 10)),
-                       QDateTime(QDate(2014, 11, 27), QTime(22, 18)), testDetail);
-    QString test2Detail = "Ent_evo #imaginature# 一个世纪过去了，蚯蚓的王国又向大地的尽头前进了一公里。它们不急。从来都不急。";
-    LocalJournal test2("111111", QDateTime(QDate(2014, 10, 28), QTime(3, 10)),
-                       QDateTime(QDate(2014, 11, 27), QTime(12, 48)), test2Detail,
-                       QDateTime(QDate(2014, 12, 1), QTime(12, 0)));
-    journals.push_back(test1);
-    journals.push_back(test2);
-    // test data end
+    this->journals = journals;
 }
+

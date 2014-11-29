@@ -63,6 +63,12 @@ void EditJournalPanel::editLocalJournal(const LocalJournal& journal)
     detailEdit->setPlainText(journal.detail);
 }
 
+void EditJournalPanel::startNewJournal()
+{
+    initEditState();
+    this->setFocus();
+}
+
 void EditJournalPanel::showAlarmEdit()
 {
     if (alarmEdit->isVisible()) {
@@ -88,6 +94,7 @@ void EditJournalPanel::initEditState()
 {
     detailEdit->clear();
     alarmEdit->setVisible(false);
+    editingJournal = LocalJournal();
 }
 
 void EditJournalPanel::saveJournal()

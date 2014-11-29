@@ -24,6 +24,9 @@ public:
     ~EditJournalPanel();
     void editLocalJournal(const LocalJournal& journal);
 
+public slots:
+    void startNewJournal();
+
 signals:
     void deleteLocalJournal(const QString& journalID);
     void saveLocalJournal(const LocalJournal& journal);

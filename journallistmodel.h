@@ -21,20 +21,18 @@ public:
      */
     bool removeRow(int row, const QModelIndex &parent = QModelIndex());
     /**
-     * @brief updateRow
+     * @brief updateJournalAtRow
      * update specific row with new journal data
      */
-    bool updateRow(int row, LocalJournal& journal);
+    bool updateJournalAtRow(int row, const LocalJournal& journal);
+    bool addJournal(const LocalJournal& journal);
+    void setJournals(const QList<LocalJournal>& journals);
+
 signals:
 
 public slots:
 
 private:
-    /**
-     * @brief fillJournalsList
-     * select local journals from sqlite
-     */
-    void fillJournalsList();
     QList<LocalJournal> journals;
 };
 
