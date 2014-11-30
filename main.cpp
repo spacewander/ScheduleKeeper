@@ -7,6 +7,7 @@
 #include "global.h"
 #include "mainwindow.h"
 #include "logindialog.h"
+#include "userstable.h"
 
 /**
  * @brief extractUsername
@@ -23,8 +24,13 @@ const QString extractUsername(bool &ok)
         ok = false;
         return "";
     }
+    const QString username = encodedUsername.replace(0, SESSSION_KEY.size(), "");
+    if (!hasUser(username)) {
+        ok = false;
+        return "";
+    }
     ok = true;
-    return encodedUsername.replace(0, SESSSION_KEY.size(), "");
+    return username;
 }
 
 int main(int argc, char *argv[])

@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -19,7 +19,8 @@ SOURCES += main.cpp\
     settingsdialog.cpp \
     editjournalpanel.cpp \
     localjournal.cpp \
-    journallistmodel.cpp
+    journallistmodel.cpp \
+    userstable.cpp
 
 HEADERS  += mainwindow.h \
     logindialog.h \
@@ -27,7 +28,8 @@ HEADERS  += mainwindow.h \
     settingsdialog.h \
     editjournalpanel.h \
     localjournal.h \
-    journallistmodel.h
+    journallistmodel.h \
+    userstable.h
 
 FORMS    +=
 
