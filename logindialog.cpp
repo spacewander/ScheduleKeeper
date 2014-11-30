@@ -4,10 +4,12 @@
 #include "global.h"
 #include "logindialog.h"
 #include "mainwindow.h"
+#include "userstable.h"
 
 LoginDialog::LoginDialog(QWidget *parent) :
     QDialog(parent)
 {
+    net = new QNetworkAccessManager();
     setUpGUI();
     setWindowTitle(tr("欢迎使用") );
     setModal(true);
@@ -26,12 +28,15 @@ void LoginDialog::setUpGUI()
 
     // initialize the username lineedit
     editUsername = new QLineEdit( this );
+    editUsername->setMaxLength(20);
     // initialize the password field so that it does not echo
     // characters
     editPassword = new QLineEdit( this );
     editPassword->setEchoMode( QLineEdit::Password );
+    editPassword->setMaxLength(20);
     ensurePassword = new QLineEdit( this );
     ensurePassword->setEchoMode( QLineEdit::Password );
+    ensurePassword->setMaxLength(20);
     ensurePassword->setVisible(false);
 
     // initialize the labels
@@ -108,10 +113,21 @@ void LoginDialog::slotAcceptLogin()
 
 bool LoginDialog::canLogin(const QString& username, const QString& password)
 {
-    if (username == "a" && password == "b") {
+    // 判断是否存在于本地
+    if (hasUserWithPassword(username, password)) {
         return true;
     }
+    // 否则在有网络的情况下，发送用户名和加密后的密码到云端进行验证
+    if (isConnectedToNet()) {
+        // 验证成功后，存储用户信息到本地
+        //storeUserToDB(username, password, salt);
+    }
     return false;
+}
+
+bool LoginDialog::isConnectedToNet()
+{
+    return (net->networkAccessible() == QNetworkAccessManager::Accessible);
 }
 
 void LoginDialog::storeUsernameToSetting(const QString& username)
@@ -121,7 +137,14 @@ void LoginDialog::storeUsernameToSetting(const QString& username)
     QByteArray sessionUser((SESSSION_KEY + username).toStdString().c_str());
 
     setting.setValue("username", sessionUser.toBase64(QByteArray::Base64Encoding));
-    qDebug() << QByteArray::fromBase64(setting.value("username").toByteArray()).data();
+    qDebug() << QByteArray::fromBase64(setting.value("username").toByteArray())
+        .data();
+}
+
+void LoginDialog::storeUserToDB(const QString& username, const QString& password, 
+        const QString& salt)
+{
+    addNewUser(username, password, salt);
 }
 
 void LoginDialog::registerUser()

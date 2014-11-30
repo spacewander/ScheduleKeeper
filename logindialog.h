@@ -1,14 +1,15 @@
 #ifndef LOGINDIALOG_H
 #define LOGINDIALOG_H
 
-#include <QDialog>
-#include <QLabel>
-#include <QMainWindow>
-#include <QPushButton>
-#include <QDialogButtonBox>
-#include <QLineEdit>
-#include <QGridLayout>
 #include <QDebug>
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QGridLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMainWindow>
+#include <QNetworkAccessManager>
+#include <QPushButton>
 
 #include "logindialog.h"
 
@@ -20,6 +21,7 @@ class LoginDialog: public QDialog
 
 private:
         MainWindow* host;
+        QNetworkAccessManager* net;
 
         QLabel* labelUsername;
         QLabel* labelPassword;
@@ -31,6 +33,7 @@ private:
         QDialogButtonBox* buttons;
 
         void setUpGUI();
+        bool isConnectedToNet();
         /**
          * @brief canLogin
          * 是否能够登录。第一步，检查本地的User表，看看用户名和密码是否匹配
@@ -50,6 +53,8 @@ private:
          */
         bool canRegister(const QString& username, const QString& password);
         void storeUsernameToSetting(const QString& username);
+        void storeUserToDB(const QString& username, const QString& password, 
+                const QString& salt);
 
 public:
     explicit LoginDialog(QWidget *parent = 0);

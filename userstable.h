@@ -1,6 +1,7 @@
 #ifndef USERSTABLE_H
 #define USERSTABLE_H
 
+#include <QByteArray>
 #include <QObject>
 #include <QPair>
 #include <QSqlDatabase>
@@ -28,6 +29,8 @@ public:
     static UsersTable* getUsesTable();
     bool checkUserExist(const QString& username);
     bool checkUserOk(const QString& username, const QString& password);
+    bool insertUser(const QString& username, const QString& password,
+                    const QString& salt);
 signals:
 
 public slots:
@@ -36,10 +39,18 @@ private:
     explicit UsersTable(QObject *parent = 0);
     explicit UsersTable(const UsersTable&);
     UsersTable operator =(UsersTable&);
-    QPair<QString, QString> find_by_username(const QString& username);
+    const QPair<QString, QString> find_by_username(const QString& username);
+    const QByteArray encrypt(const QString& pass, const QString& salt);
+    /// checked select
+    bool select();
+    /// checked submitAll
+    bool submitAll();
     QSqlDatabase database;
     QSqlRelationalTableModel* users;
 };
 
 bool hasUser(const QString& username);
+bool hasUserWithPassword(const QString& username, const QString& password);
+bool addNewUser(const QString& username, const QString& password, 
+        const QString& salt);
 #endif // USERSTABLE_H
