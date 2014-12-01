@@ -44,6 +44,7 @@ public slots:
     void logout();
 
 private slots:
+    void startSearching();
     void enableClearSearch(const QString &text);
     /**
      * 获取ListView中的index对应的LocalJournal数据，并存储到EditJournalPanel中

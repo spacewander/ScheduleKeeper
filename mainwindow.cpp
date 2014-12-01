@@ -113,6 +113,8 @@ void MainWindow::setUpGUI()
     clearSearchResultAction->setEnabled(false);
     connect(searchEdit, SIGNAL(textEdited(const QString &)), 
             this, SLOT(enableClearSearch(const QString &)));
+    connect(searchEdit, SIGNAL(returnPressed()),
+            this, SLOT(startSearching()));
     connect(clearSearchResultAction, SIGNAL(triggered()), 
             this, SLOT(switchSearchToDisplay()));
     connect(clearSearchResultAction, &QAction::triggered, [&]() {
@@ -192,6 +194,22 @@ void MainWindow::refreshLastUpdateTime()
     qWarning() << "after lastupdatetime: " << settings.value("lastupdatetime").toString();
 }
 
+void MainWindow::startSearching()
+{
+    isSearched = true;
+    // start searching
+    QString query = searchEdit->text().simplified();
+    JournalsTable *table = JournalsTable::getJournalsTable();
+    journalList.setJournals(table->searchJournal(query));
+    journalListView->reset();
+    if (journalList.size() > 0) {
+        editJournalPanel->editLocalJournal(journalList.at(0));
+    }
+    else {
+        editJournalPanel->initEditState();
+    }
+}
+
 void MainWindow::enableClearSearch(const QString& text)
 {
     if (text.size()) {
@@ -220,9 +238,13 @@ void MainWindow::startNewJournal()
 
 void MainWindow::switchSearchToDisplay()
 {
-    isSearched = false;
-    searchEdit->clear();
-    clearSearchResultAction->setEnabled(false);
+    if (isSearched == true) {
+        isSearched = false;
+        searchEdit->clear();
+        clearSearchResultAction->setEnabled(false);
+        journalList.setJournals(totalLocalJournals);
+        journalListView->reset();
+    }
 }
 
 void MainWindow::connectEditJournalPanel()
@@ -237,6 +259,7 @@ void MainWindow::connectEditJournalPanel()
 
 void MainWindow::sortJournalsBy(SortBy sortBy)
 {
+    switchSearchToDisplay();
     if (sortBy == this->sortBy)
         return;
     switch (sortBy) {
@@ -254,8 +277,9 @@ void MainWindow::sortJournalsBy(SortBy sortBy)
     }
     totalLocalJournals.clear();
     JournalsTable *table = JournalsTable::getJournalsTable();
-    totalLocalJournals.append(table->selectJournal(sortBy));
+    totalLocalJournals = table->selectJournal(sortBy);
     journalList.setJournals(totalLocalJournals);
+    journalListView->reset();
 }
 
 void MainWindow::deleteLocalJournal(const QString& journalID)

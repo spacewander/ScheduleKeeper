@@ -29,6 +29,7 @@ public:
     void setJournals(const QList<LocalJournal>& journals);
 
     const LocalJournal& at(const unsigned int row) const;
+    unsigned int size() const;
 
 signals:
 

@@ -89,3 +89,7 @@ const LocalJournal& JournalListModel::at(const unsigned int row) const
     return journals.at(row);
 }
 
+unsigned int JournalListModel::size() const
+{
+    return journals.size();
+}

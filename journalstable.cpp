@@ -111,6 +111,7 @@ bool JournalsTable::submitAll()
 
 const QList<LocalJournal>& JournalsTable::selectJournal(SortBy sortBy)
 {
+    journals->setFilter(""); // reset Filter
     switch (sortBy) {
     case SortBySaveTime:
         journals->setSort(1, Qt::DescendingOrder);
@@ -127,6 +128,7 @@ const QList<LocalJournal>& JournalsTable::selectJournal(SortBy sortBy)
     }
     select();
     int rowCount = journals->rowCount();
+    qWarning() << "select journals: " << rowCount;
     totalJournal.clear();
     for (int i = 0; i < rowCount; ++i) {
         totalJournal.push_back(combineJournal(i));
@@ -136,6 +138,23 @@ const QList<LocalJournal>& JournalsTable::selectJournal(SortBy sortBy)
 
 const QList<LocalJournal>& JournalsTable::searchJournal(const QString& query)
 {
+
+    QString likeQuery = query;
+    likeQuery.replace("\"", "\\\"");
+    likeQuery.replace("'", "\'");
+    likeQuery.replace("%", "\%");
+    likeQuery.replace("\\", "\\\\");
+    likeQuery.replace("_", "\_");
+    likeQuery = "%" + likeQuery + "%";
+    journals->setFilter(QString(" detail like '%1'").arg(likeQuery));
+    qWarning() << "search with " << likeQuery;
+    select();
+    int rowCount = journals->rowCount();
+    relativeJournal.clear();
+    qWarning() << "relative journals: " << rowCount;
+    for (int i = 0; i < rowCount; ++i) {
+        relativeJournal.push_back(combineJournal(i));
+    }
     return relativeJournal;
 }
 
