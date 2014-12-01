@@ -1,6 +1,5 @@
 #include <QCryptographicHash>
 #include <QDebug>
-#include <QDir>
 #include <QFile>
 #include <QSqlError>
 #include <QSqlRecord>
@@ -10,7 +9,7 @@
 
 UsersTable *table = nullptr;
 
-UsersTable* UsersTable::getUsesTable()
+UsersTable* UsersTable::getUsersTable()
 {
     if (table == nullptr) {
         table = new UsersTable();
@@ -113,19 +112,19 @@ bool UsersTable::submitAll()
 
 bool hasUser(const QString &username)
 {
-    UsersTable *table = UsersTable::getUsesTable();
+    UsersTable *table = UsersTable::getUsersTable();
     return table->checkUserExist(username);
 }
 
 bool hasUserWithPassword(const QString& username, const QString& password)
 {
-    UsersTable *table = UsersTable::getUsesTable();
+    UsersTable *table = UsersTable::getUsersTable();
     return table->checkUserOk(username, password);
 }
 
 bool addNewUser(const QString& username, const QString& password, 
         const QString& salt)
 {
-    UsersTable *table = UsersTable::getUsesTable();
+    UsersTable *table = UsersTable::getUsersTable();
     return table->insertUser(username, password, salt);
 }

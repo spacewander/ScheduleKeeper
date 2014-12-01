@@ -26,7 +26,7 @@ class UsersTable : public QObject
 {
     Q_OBJECT
 public:
-    static UsersTable* getUsesTable();
+    static UsersTable* getUsersTable();
     bool checkUserExist(const QString& username);
     bool checkUserOk(const QString& username, const QString& password);
     bool insertUser(const QString& username, const QString& password,

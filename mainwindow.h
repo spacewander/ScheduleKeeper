@@ -95,11 +95,6 @@ private:
     QAction *sortBySaveTime;
     QAction *sortByCreatedTime;
     QAction *sortByRemainder;
-    enum SortBy {
-        SortBySaveTime,
-        SortByCreatedTime,
-        SortByRemainder,
-    };
 
     QAction *newAction;
     QLineEdit *searchEdit;

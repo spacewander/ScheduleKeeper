@@ -20,7 +20,8 @@ SOURCES += main.cpp\
     editjournalpanel.cpp \
     localjournal.cpp \
     journallistmodel.cpp \
-    userstable.cpp
+    userstable.cpp \
+    journalstable.cpp
 
 HEADERS  += mainwindow.h \
     logindialog.h \
@@ -29,7 +30,8 @@ HEADERS  += mainwindow.h \
     editjournalpanel.h \
     localjournal.h \
     journallistmodel.h \
-    userstable.h
+    userstable.h \
+    journalstable.h
 
 FORMS    +=
 
