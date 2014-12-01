@@ -12,8 +12,10 @@
 #include <QMenu>
 #include <QSettings>
 #include <QToolBar>
+#include <QToolButton>
 
 #include "settingsdialog.h"
+#include "global.h"
 #include "localjournal.h"
 #include "journallistmodel.h"
 
@@ -62,6 +64,7 @@ private:
     void setUpGUI();
     void setUpJournals();
     void connectEditJournalPanel();
+    void sortJournalsBy(SortBy sortBy);
 
     /**
      * @brief refreshLastUpdateTime
@@ -91,10 +94,12 @@ private:
 
     QAction *settingAction;
 
+    QToolButton* popupBtn;
     QMenu *sortMenu;
     QAction *sortBySaveTime;
     QAction *sortByCreatedTime;
     QAction *sortByRemainder;
+    SortBy sortBy;
 
     QAction *newAction;
     QLineEdit *searchEdit;
@@ -116,6 +121,7 @@ private:
      */
     int editingRow;
     QList<LocalJournal> totalLocalJournals;
+    QList<LocalJournal> relativeLocalJournals;
 
     /**
      * 编辑LocalJournal的面板

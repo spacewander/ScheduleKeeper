@@ -130,6 +130,9 @@ void EditJournalPanel::createJournal()
         editingJournal.willAlarm = true;
         editingJournal.alarmTime = alarmEdit->dateTime();
     }
+    else {
+        editingJournal.willAlarm = false;
+    }
     emit createLocalJournal(editingJournal);
     saveBtn->setText(tr("保存"));
 }

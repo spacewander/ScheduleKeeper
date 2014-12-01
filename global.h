@@ -9,5 +9,6 @@ enum SortBy {
     SortBySaveTime,
     SortByCreatedTime,
     SortByRemainder,
+    SortByNull,
 };
 #endif // GLOBAL_H

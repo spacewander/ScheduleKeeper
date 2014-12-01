@@ -1,11 +1,9 @@
 #include <QDebug>
 #include <QIcon>
-#include <QToolButton>
 #include <QtSql>
 
 #include "mainwindow.h"
 #include "editjournalpanel.h"
-#include "global.h"
 #include "logindialog.h"
 #include "journalstable.h"
 
@@ -23,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QIcon icon = QIcon(":/rs/alarm-512.png");
     setWindowIcon(icon);
     isSearched = false;
+    sortBy = SortByNull;
 }
 
 MainWindow::~MainWindow()
@@ -80,12 +79,21 @@ void MainWindow::setUpGUI()
 
     sortMenu = new QMenu(tr("排序方式"));
     sortByCreatedTime = new QAction(tr("按创建时间排序"), this);
+    connect(sortByCreatedTime, &QAction::triggered, [&](){
+       sortJournalsBy(SortByCreatedTime);
+    });
     sortBySaveTime = new QAction(tr("按修改时间排序"), this);
+    connect(sortBySaveTime, &QAction::triggered, [&](){
+       sortJournalsBy(SortBySaveTime);
+    });
     sortByRemainder = new QAction(tr("按提醒排序") ,this);
+    connect(sortByRemainder, &QAction::triggered, [&](){
+       sortJournalsBy(SortByRemainder);
+    });
     sortMenu->addAction(sortByCreatedTime);
     sortMenu->addAction(sortBySaveTime);
     sortMenu->addAction(sortByRemainder);
-    QToolButton* popupBtn = new QToolButton();
+    popupBtn = new QToolButton();
     popupBtn->setText(tr("排序方式"));
     popupBtn->setMenu(sortMenu);
     popupBtn->setPopupMode(QToolButton::InstantPopup);
@@ -156,7 +164,6 @@ void MainWindow::setUpJournals()
     connect(journalListView, SIGNAL(clicked(const QModelIndex&)), 
             this, SLOT(getJournalWithIndex(const QModelIndex&)));
 
-    totalLocalJournals.clear();
     // test data begin
 //    QString testDetail = "生活就像海洋，只有意志坚强的人才能到达彼岸。";
 //    LocalJournal test1("111111", QDateTime(QDate(2014, 7, 28), QTime(23, 10)),
@@ -168,7 +175,7 @@ void MainWindow::setUpJournals()
 //    totalLocalJournals.push_back(test1);
 //    totalLocalJournals.push_back(test2);
     // test data end
-    journalList.setJournals(totalLocalJournals);
+    sortJournalsBy(SortBySaveTime);
 }
 
 void MainWindow::updateJournals()
@@ -226,6 +233,29 @@ void MainWindow::connectEditJournalPanel()
             this, SLOT(createLocalJournal(LocalJournal&)));
     connect(editJournalPanel, SIGNAL(deleteLocalJournal(QString)),
             this, SLOT(deleteLocalJournal(QString)));
+}
+
+void MainWindow::sortJournalsBy(SortBy sortBy)
+{
+    if (sortBy == this->sortBy)
+        return;
+    switch (sortBy) {
+    case SortByCreatedTime:
+        popupBtn->setText(tr("按创建时间排序"));
+        break;
+    case SortBySaveTime:
+        popupBtn->setText(tr("按修改时间排序"));
+        break;
+    case SortByRemainder:
+        popupBtn->setText(tr("按提醒排序"));
+        break;
+    default:
+        return;
+    }
+    totalLocalJournals.clear();
+    JournalsTable *table = JournalsTable::getJournalsTable();
+    totalLocalJournals.append(table->selectJournal(sortBy));
+    journalList.setJournals(totalLocalJournals);
 }
 
 void MainWindow::deleteLocalJournal(const QString& journalID)

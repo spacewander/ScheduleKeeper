@@ -14,6 +14,7 @@
  * DML: create table journal(
  * detail text,
  * savetime datetime,
+ * createdtime datetime,
  * alarmtime datetime,
  * journalID varchar(12),
  * deleted boolean,
@@ -30,7 +31,7 @@ public:
     bool deleteJournal(const QString& journalID);
     bool updateJournal(const LocalJournal& newJournal);
     bool insertJournal(const LocalJournal& journal);
-    const QList<LocalJournal>& selectJournal();
+    const QList<LocalJournal>& selectJournal(SortBy sortBy);
     const QList<LocalJournal>& searchJournal(const QString& query);
 signals:
 
@@ -46,6 +47,7 @@ private:
     /// checked submitAll
     bool submitAll();
     bool updateJournal_(int row, const LocalJournal &journal);
+    LocalJournal combineJournal(int row);
     QSqlDatabase database;
     QSqlRelationalTableModel* journals;
     QList<LocalJournal> totalJournal;
