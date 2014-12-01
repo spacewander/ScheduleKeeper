@@ -40,6 +40,8 @@ public:
     QDateTime createdTime;
 
     bool deleted;
+    /// userName is initialized whenever this record is created
+    QString userName;
 };
 
 void logDeleteLocalJournal(const LocalJournal& journal);

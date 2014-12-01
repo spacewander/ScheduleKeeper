@@ -30,8 +30,8 @@ public:
     bool deleteJournal(const QString& journalID);
     bool updateJournal(const LocalJournal& newJournal);
     bool insertJournal(const LocalJournal& journal);
-    QList<LocalJournal> totalJournal;
-    QList<LocalJournal> relativeJournal;
+    const QList<LocalJournal>& selectJournal();
+    const QList<LocalJournal>& searchJournal(const QString& query);
 signals:
 
 public slots:
@@ -45,14 +45,11 @@ private:
     bool select();
     /// checked submitAll
     bool submitAll();
+    bool updateJournal_(int row, const LocalJournal &journal);
     QSqlDatabase database;
     QSqlRelationalTableModel* journals;
+    QList<LocalJournal> totalJournal;
+    QList<LocalJournal> relativeJournal;
 };
-
-bool deleteJournal(const QString& journalID);
-bool updateJournal(const LocalJournal& newJournal);
-bool insertJournal(const LocalJournal& journal);
-const QList<LocalJournal>& selectJournal();
-const QList<LocalJournal>& searchJournal(const QString& query);
 
 #endif // JOURNALSTABLE_H

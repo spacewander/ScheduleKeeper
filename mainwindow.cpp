@@ -7,6 +7,7 @@
 #include "editjournalpanel.h"
 #include "global.h"
 #include "logindialog.h"
+#include "journalstable.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -67,7 +68,7 @@ void MainWindow::setUpGUI()
             background: rgba(255,255,255,1);\
             }");
 
-    qDebug() << "username: " << username;
+    qWarning() << "username: " << username;
     usernameLabel = new QLabel(username);
     usernameLabel->setAlignment(Qt::AlignCenter);
     usernameLabel->setMinimumWidth(200);
@@ -176,12 +177,12 @@ void MainWindow::updateJournals()
 
 void MainWindow::refreshLastUpdateTime()
 {
-    qDebug() << "before lastupdatetime: " << settings.value("lastupdatetime").toString();
+    qWarning() << "before lastupdatetime: " << settings.value("lastupdatetime").toString();
     lastUpdateTime = QDateTime::currentDateTime();
     QString lastupdatetime = lastUpdateTime.toString("yyyy.MM.dd.hh.mm");
     lastUpdateLabel->setText(lastupdatetime);
     settings.setValue("lastupdatetime", lastupdatetime);
-    qDebug() << "after lastupdatetime: " << settings.value("lastupdatetime").toString();
+    qWarning() << "after lastupdatetime: " << settings.value("lastupdatetime").toString();
 }
 
 void MainWindow::enableClearSearch(const QString& text)
@@ -221,18 +222,20 @@ void MainWindow::connectEditJournalPanel()
 {
     connect(editJournalPanel, SIGNAL(saveLocalJournal(LocalJournal)),
                 this, SLOT(saveLocalJournal(LocalJournal)));
-    connect(editJournalPanel, SIGNAL(createLocalJournal(LocalJournal)),
-            this, SLOT(createLocalJournal(LocalJournal)));
+    connect(editJournalPanel, SIGNAL(createLocalJournal(LocalJournal&)),
+            this, SLOT(createLocalJournal(LocalJournal&)));
     connect(editJournalPanel, SIGNAL(deleteLocalJournal(QString)),
             this, SLOT(deleteLocalJournal(QString)));
 }
 
 void MainWindow::deleteLocalJournal(const QString& journalID)
 {
-    qDebug() << "delete localjournal: " << journalID;
+    qWarning() << "delete localjournal: " << journalID;
     // update where journalID = xxx ...
+    JournalsTable* table = JournalsTable::getJournalsTable();
+    table->deleteJournal(journalID);
     if (!journalList.removeJournalWithID(journalID)) {
-        qDebug() << "can not delete journalID: " << journalID;
+        qWarning() << "can not delete journalID: " << journalID;
     }
     journalListView->reset();
 }
@@ -241,19 +244,24 @@ void MainWindow::saveLocalJournal(const LocalJournal& journal)
 {
     logSaveLocalJournal(journal);
     // update where journalID = xxx.journalID
+    JournalsTable* table = JournalsTable::getJournalsTable();
+    table->updateJournal(journal);
     if (!journalList.updateJournal(journal)) {
-        qDebug() << "can not save journalID: " << journal.journalID;
+        qWarning() << "can not save journalID: " << journal.journalID;
     }
     journalListView->reset();
 }
 
-void MainWindow::createLocalJournal(const LocalJournal& journal)
+void MainWindow::createLocalJournal(LocalJournal& journal)
 {
     editingRow = 0;
     logCreateLocalJournal(journal);
     // insert with ...
+    JournalsTable* table = JournalsTable::getJournalsTable();
+    table->insertJournal(journal);
+    journal.userName = username;
     if (!journalList.addJournal(journal)) {
-        qDebug() << "can not create journalID: " << journal.journalID;
+        qWarning() << "can not create journalID: " << journal.journalID;
     }
     journalListView->reset();
 }

@@ -38,7 +38,7 @@ public:
 public slots:
     void deleteLocalJournal(const QString& journalID);
     void saveLocalJournal(const LocalJournal&);
-    void createLocalJournal(const LocalJournal&);
+    void createLocalJournal(LocalJournal &);
     void logout();
 
 private slots:

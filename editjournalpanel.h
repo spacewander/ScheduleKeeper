@@ -30,7 +30,7 @@ public slots:
 signals:
     void deleteLocalJournal(const QString& journalID);
     void saveLocalJournal(const LocalJournal& journal);
-    void createLocalJournal(const LocalJournal& journal);
+    void createLocalJournal(LocalJournal& journal);
 
 private slots:
     void showAlarmEdit();

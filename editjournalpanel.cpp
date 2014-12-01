@@ -13,7 +13,7 @@ EditJournalPanel::EditJournalPanel(QWidget *parent) :
     detailEdit->setFocus();
 
     saveBtn = new QPushButton(this);
-    saveBtn->setText(tr("保存"));
+    saveBtn->setText(tr("创建"));
     connect(saveBtn, &QPushButton::clicked, [&](){
         if (editingJournal.journalID == "") {
             createJournal();
@@ -55,6 +55,7 @@ EditJournalPanel::~EditJournalPanel()
 
 void EditJournalPanel::editLocalJournal(const LocalJournal& journal)
 {
+    saveBtn->setText(tr("保存"));
     editingJournal = journal;
     if (journal.willAlarm) {
         alarmEdit->setVisible(true);
@@ -98,6 +99,7 @@ void EditJournalPanel::initEditState()
     detailEdit->clear();
     alarmEdit->setVisible(false);
     editingJournal = LocalJournal();
+    saveBtn->setText(tr("创建"));
 }
 
 void EditJournalPanel::saveJournal()
@@ -129,5 +131,6 @@ void EditJournalPanel::createJournal()
         editingJournal.alarmTime = alarmEdit->dateTime();
     }
     emit createLocalJournal(editingJournal);
+    saveBtn->setText(tr("保存"));
 }
 

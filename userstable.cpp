@@ -18,7 +18,7 @@ UsersTable* UsersTable::getUsersTable()
 }
 
 UsersTable::UsersTable(QObject *parent) :
-    QObject(parent), database(QSqlDatabase::addDatabase("QSQLITE"))
+    QObject(parent), database(QSqlDatabase::addDatabase("QSQLITE", "user"))
 {
     QFile db("./ScheduleKeeper.db");
     if (db.exists()) {
