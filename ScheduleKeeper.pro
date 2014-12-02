@@ -21,7 +21,8 @@ SOURCES += main.cpp\
     localjournal.cpp \
     journallistmodel.cpp \
     userstable.cpp \
-    journalstable.cpp
+    journalstable.cpp \
+    net.cpp
 
 HEADERS  += mainwindow.h \
     logindialog.h \
@@ -31,7 +32,8 @@ HEADERS  += mainwindow.h \
     localjournal.h \
     journallistmodel.h \
     userstable.h \
-    journalstable.h
+    journalstable.h \
+    net.h
 
 FORMS    +=
 

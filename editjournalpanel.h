@@ -23,6 +23,11 @@ public:
     explicit EditJournalPanel(QWidget *parent = 0);
     ~EditJournalPanel();
     void editLocalJournal(const LocalJournal& journal);
+    /**
+     * @brief initEditState
+     * 初始化面板到创建/编辑日程之前的状态
+     */
+    void initEditState();
 
 public slots:
     void startNewJournal();
@@ -38,11 +43,6 @@ private slots:
     void deleteJournal();
 
 private:
-    /**
-     * @brief initEditState
-     * 初始化面板到创建/编辑日程之前的状态
-     */
-    void initEditState();
     void saveJournal();
     void createJournal();
 

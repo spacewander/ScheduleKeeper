@@ -67,6 +67,14 @@ void EditJournalPanel::editLocalJournal(const LocalJournal& journal)
     detailEdit->setPlainText(journal.detail);
 }
 
+void EditJournalPanel::initEditState()
+{
+    detailEdit->clear();
+    alarmEdit->setVisible(false);
+    editingJournal = LocalJournal();
+    saveBtn->setText(tr("创建"));
+}
+
 void EditJournalPanel::startNewJournal()
 {
     initEditState();
@@ -92,14 +100,6 @@ void EditJournalPanel::deleteJournal()
         editingJournal.clear();
         initEditState();
     }
-}
-
-void EditJournalPanel::initEditState()
-{
-    detailEdit->clear();
-    alarmEdit->setVisible(false);
-    editingJournal = LocalJournal();
-    saveBtn->setText(tr("创建"));
 }
 
 void EditJournalPanel::saveJournal()

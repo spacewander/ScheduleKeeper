@@ -144,7 +144,6 @@ const QList<LocalJournal>& JournalsTable::searchJournal(const QString& query)
     likeQuery.replace("'", "\'");
     likeQuery.replace("%", "\%");
     likeQuery.replace("\\", "\\\\");
-    likeQuery.replace("_", "\_");
     likeQuery = "%" + likeQuery + "%";
     journals->setFilter(QString(" detail like '%1'").arg(likeQuery));
     qWarning() << "search with " << likeQuery;

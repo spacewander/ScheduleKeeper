@@ -5,11 +5,11 @@
 #include "logindialog.h"
 #include "mainwindow.h"
 #include "userstable.h"
+#include "net.h"
 
 LoginDialog::LoginDialog(QWidget *parent) :
     QDialog(parent)
 {
-    net = new QNetworkAccessManager();
     setUpGUI();
     setWindowTitle(tr("欢迎使用") );
     setModal(true);
@@ -118,16 +118,11 @@ bool LoginDialog::canLogin(const QString& username, const QString& password)
         return true;
     }
     // 否则在有网络的情况下，发送用户名和加密后的密码到云端进行验证
-    if (isConnectedToNet()) {
+    if (isConnected()) {
         // 验证成功后，存储用户信息到本地
         //storeUserToDB(username, password, salt);
     }
     return false;
-}
-
-bool LoginDialog::isConnectedToNet()
-{
-    return (net->networkAccessible() == QNetworkAccessManager::Accessible);
 }
 
 void LoginDialog::storeUsernameToSetting(const QString& username)
