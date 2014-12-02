@@ -7,7 +7,6 @@ const QString  SESSSION_KEY = "SCHEDULERKEEPER";
 
 enum SortBy {
     SortBySaveTime,
-    SortByCreatedTime,
     SortByRemainder,
     SortByNull,
 };

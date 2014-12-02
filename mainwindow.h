@@ -98,7 +98,6 @@ private:
     QToolButton* popupBtn;
     QMenu *sortMenu;
     QAction *sortBySaveTime;
-    QAction *sortByCreatedTime;
     QAction *sortByRemainder;
     SortBy sortBy;
 

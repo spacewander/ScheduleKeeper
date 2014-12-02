@@ -22,7 +22,9 @@ SOURCES += main.cpp\
     journallistmodel.cpp \
     userstable.cpp \
     journalstable.cpp \
-    net.cpp
+    net.cpp \
+    basicjournal.cpp \
+    detailjournal.cpp
 
 HEADERS  += mainwindow.h \
     logindialog.h \
@@ -33,7 +35,10 @@ HEADERS  += mainwindow.h \
     journallistmodel.h \
     userstable.h \
     journalstable.h \
-    net.h
+    net.h \
+    basicjournal.h \
+    detailjournal.h \
+    remotejournal.h
 
 FORMS    +=
 

@@ -5,6 +5,7 @@
 #include <QSqlQuery>
 
 #include "journalstable.h"
+
 JournalsTable *journalTable = nullptr;
 
 JournalsTable* JournalsTable::getJournalsTable()
@@ -79,12 +80,11 @@ bool JournalsTable::updateJournal_(int row, const LocalJournal &journal)
 {
     journals->setData(journals->index(row, 0), journal.detail);
     journals->setData(journals->index(row, 1), journal.saveTime);
-    journals->setData(journals->index(row, 2), journal.createdTime);
-    journals->setData(journals->index(row, 3), journal.alarmTime);
-    journals->setData(journals->index(row, 4), journal.journalID);
-    journals->setData(journals->index(row, 5), journal.deleted);
-    journals->setData(journals->index(row, 6), journal.userName);
-    journals->setData(journals->index(row, 7), journal.willAlarm);
+    journals->setData(journals->index(row, 2), journal.alarmTime);
+    journals->setData(journals->index(row, 3), journal.journalID);
+    journals->setData(journals->index(row, 4), journal.deleted);
+    journals->setData(journals->index(row, 5), journal.userName);
+    journals->setData(journals->index(row, 6), journal.willAlarm);
     return submitAll();
 }
 
@@ -117,9 +117,6 @@ const QList<LocalJournal>& JournalsTable::selectJournal(SortBy sortBy)
         journals->setSort(1, Qt::DescendingOrder);
         break;
     case SortByRemainder:
-        journals->setSort(3, Qt::DescendingOrder);
-        break;
-    case SortByCreatedTime:
         journals->setSort(2, Qt::DescendingOrder);
         break;
     default:
@@ -161,13 +158,12 @@ LocalJournal JournalsTable::combineJournal(int row)
 {
     QString journalID = journals->record(row).value("journalID").toString();
     QString detail = journals->record(row).value("detail").toString();
-    QDateTime ctime = journals->record(row).value("createdtime").toDateTime();
     QDateTime mtime = journals->record(row).value("savetime").toDateTime();
     QDateTime alarmtime = journals->record(row).value("alarmtime").toDateTime();
     bool deleted = journals->record(row).value("deleted").toBool();
     bool willAlarm = journals->record(row).value("willalarm").toBool();
     QString userName = journals->record(row).value("userName").toString();
-    LocalJournal journal(journalID, ctime, mtime, detail, alarmtime);
+    LocalJournal journal(journalID, mtime, detail, alarmtime);
     journal.willAlarm = willAlarm;
     journal.deleted = deleted;
     journal.userName = userName;

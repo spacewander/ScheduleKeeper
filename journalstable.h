@@ -14,7 +14,6 @@
  * DML: create table journal(
  * detail text,
  * savetime datetime,
- * createdtime datetime,
  * alarmtime datetime,
  * journalID varchar(12),
  * deleted boolean,

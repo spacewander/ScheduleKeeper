@@ -78,10 +78,6 @@ void MainWindow::setUpGUI()
     connect(settingAction, SIGNAL(triggered()), &settingsDialog, SLOT(exec()));
 
     sortMenu = new QMenu(tr("排序方式"));
-    sortByCreatedTime = new QAction(tr("按创建时间排序"), this);
-    connect(sortByCreatedTime, &QAction::triggered, [&](){
-       sortJournalsBy(SortByCreatedTime);
-    });
     sortBySaveTime = new QAction(tr("按修改时间排序"), this);
     connect(sortBySaveTime, &QAction::triggered, [&](){
        sortJournalsBy(SortBySaveTime);
@@ -90,7 +86,6 @@ void MainWindow::setUpGUI()
     connect(sortByRemainder, &QAction::triggered, [&](){
        sortJournalsBy(SortByRemainder);
     });
-    sortMenu->addAction(sortByCreatedTime);
     sortMenu->addAction(sortBySaveTime);
     sortMenu->addAction(sortByRemainder);
     popupBtn = new QToolButton();
@@ -166,17 +161,6 @@ void MainWindow::setUpJournals()
     connect(journalListView, SIGNAL(clicked(const QModelIndex&)), 
             this, SLOT(getJournalWithIndex(const QModelIndex&)));
 
-    // test data begin
-//    QString testDetail = "生活就像海洋，只有意志坚强的人才能到达彼岸。";
-//    LocalJournal test1("111111", QDateTime(QDate(2014, 7, 28), QTime(23, 10)),
-//                       QDateTime(QDate(2014, 11, 27), QTime(22, 18)), testDetail);
-//    QString test2Detail = "Ent_evo #imaginature# 一个世纪过去了，蚯蚓的王国又向大地的尽头前进了一公里。它们不急。从来都不急。";
-//    LocalJournal test2("111112", QDateTime(QDate(2014, 10, 28), QTime(3, 10)),
-//                       QDateTime(QDate(2014, 11, 27), QTime(12, 48)), test2Detail,
-//                       QDateTime(QDate(2014, 12, 1), QTime(12, 0)));
-//    totalLocalJournals.push_back(test1);
-//    totalLocalJournals.push_back(test2);
-    // test data end
     sortJournalsBy(SortBySaveTime);
 }
 
@@ -263,9 +247,6 @@ void MainWindow::sortJournalsBy(SortBy sortBy)
     if (sortBy == this->sortBy)
         return;
     switch (sortBy) {
-    case SortByCreatedTime:
-        popupBtn->setText(tr("按创建时间排序"));
-        break;
     case SortBySaveTime:
         popupBtn->setText(tr("按修改时间排序"));
         break;

@@ -123,8 +123,7 @@ void EditJournalPanel::createJournal()
 {
     editingJournal.generalizeID();
     editingJournal.deleted = false;
-    editingJournal.createdTime = QDateTime::currentDateTime();
-    editingJournal.saveTime = editingJournal.createdTime;
+    editingJournal.saveTime = QDateTime::currentDateTime();
     editingJournal.detail = detailEdit->toPlainText();
     if (alarmEdit->isVisible()) {
         editingJournal.willAlarm = true;
