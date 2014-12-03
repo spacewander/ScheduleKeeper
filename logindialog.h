@@ -8,6 +8,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QMainWindow>
+#include <QPair>
 #include <QPushButton>
 
 #include "logindialog.h"

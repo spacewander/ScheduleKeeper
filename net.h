@@ -1,9 +1,14 @@
 #ifndef NET_H
 #define NET_H
 
+#include <QJsonArray>
+#include <QJsonObject>
 #include <QList>
 #include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
 #include <QObject>
+#include <QUrl>
 
 #include "remotejournal.h"
 
@@ -16,10 +21,10 @@ public:
     /**
      * @brief getUser
      * @param username
-     * query user with username
      * @return password and salt
+     * query user with username
      */
-    const QPair<QString, QString> getUser(const QString& username);
+    QPair<QString, QString> getUser(const QString& username);
     /// create User by post his/her data to cloud
     bool postUser(const QString& username, const QString& password,
                   const QString& salt);
@@ -31,15 +36,28 @@ public:
     const DetailJournal findDetailJournal(const QString& journalID);
 
 signals:
-
+    /**
+     * @brief sendUserInfoBack
+     */
+    void sendUserInfoBack(const QPair<QString, QString>);
 public slots:
 
 private:
     explicit Net(QObject *parent = 0);
     explicit Net(const Net&);
     Net operator =(Net&);
+    void setCommonHeader(QNetworkRequest *req);
+    bool checkStatusCode(QNetworkReply *res);
+    void blockUntilFinished(QNetworkReply* res);
+    QJsonArray getJSONResult(QNetworkReply *res);
+    QPair<QString, QString>  userFound();
 
     QNetworkAccessManager* netAccess;
+    QUrl userPath;
+    QUrl basicJournalPath;
+    QUrl detailJournalPath;
+    QNetworkReply* resFindUser;
+    QNetworkReply* resRegisterUser;
 };
 
 bool isConnected();

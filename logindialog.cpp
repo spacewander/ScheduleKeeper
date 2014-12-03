@@ -119,8 +119,17 @@ bool LoginDialog::canLogin(const QString& username, const QString& password)
     }
     // 否则在有网络的情况下，发送用户名和加密后的密码到云端进行验证
     if (isConnected()) {
-        // 验证成功后，存储用户信息到本地
-        //storeUserToDB(username, password, salt);
+//        noticeLabel->setText(tr("正在尝试登录……"));
+//        noticeLabel->setVisible(true);
+        QPair<QString, QString> pass_with_salt = Net::getNetManager()->getUser(username);
+        if (pass_with_salt.first == "") {
+            return false;
+        }
+        // 存储用户信息到本地
+        storeUserToDB(username, pass_with_salt.first, pass_with_salt.second);
+        if (hasUserWithPassword(username, password)) {
+            return true;
+        }
     }
     return false;
 }
@@ -181,4 +190,3 @@ bool LoginDialog::canRegister(const QString& username, const QString& password)
     }
     return false;
 }
-

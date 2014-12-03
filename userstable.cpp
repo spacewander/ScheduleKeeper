@@ -54,7 +54,7 @@ bool UsersTable::checkUserExist(const QString &username)
 bool UsersTable::checkUserOk(const QString &username, const QString &password)
 {
     QPair<QString, QString> pass_with_salt = find_by_username(username);
-    qDebug() << pass_with_salt;
+    qDebug() << "pass with salt" << pass_with_salt;
     if (encrypt(password, pass_with_salt.second) ==
             QByteArray(pass_with_salt.first.toStdString().c_str())) {
         return true;
@@ -65,11 +65,14 @@ bool UsersTable::checkUserOk(const QString &username, const QString &password)
 bool UsersTable::insertUser(const QString &username, const QString &password,
                             const QString &salt)
 {
-    int row = users->rowCount() - 1;
+    int rowCount = users->rowCount();
+    int row = rowCount > 0 ? rowCount - 1 : 0;
     users->insertRows(row, 1);
     users->setData(users->index(row, 0), username);
     users->setData(users->index(row, 1), password);
     users->setData(users->index(row, 2), salt);
+    qWarning() << "insert user: " << username << " password " <<
+               password << " salt " << salt;
     return submitAll();
 }
 
