@@ -6,7 +6,7 @@ const int detailDisplayLength = 70;
 
 void logDeleteLocalJournal(const LocalJournal& journal)
 {
-    qDebug() << "delete localjournal: journalID " << journal.journalID;
+    qDebug() << "delete localjournal: journalId " << journal.journalId;
     if (!journal.deleted) {
         qDebug() << "Error: isDeleted has not been set to true";
     }
@@ -14,7 +14,7 @@ void logDeleteLocalJournal(const LocalJournal& journal)
 
 void logSaveLocalJournal(const LocalJournal& journal)
 {
-    qDebug() << "save localjournal: journalID " << journal.journalID;
+    qDebug() << "save localjournal: journalId " << journal.journalId;
     qDebug() << "saveTime: " << journal.saveTime;
     if (journal.willAlarm) {
         qDebug() << "alarmTime: " << journal.alarmTime;
@@ -23,7 +23,7 @@ void logSaveLocalJournal(const LocalJournal& journal)
 
 void logCreateLocalJournal(const LocalJournal& journal)
 {
-    qDebug() << "create localjournal: journalID " << journal.journalID;
+    qDebug() << "create localjournal: journalId " << journal.journalId;
     qDebug() << "saveTime: " << journal.saveTime;
     if (journal.willAlarm) {
         qDebug() << "alarmTime: " << journal.alarmTime;
@@ -34,21 +34,21 @@ LocalJournal::LocalJournal()
 {
     deleted = true;
     willAlarm = false;
-    journalID = "";
+    journalId = "";
 }
 
-LocalJournal::LocalJournal(const QString& journalID,
+LocalJournal::LocalJournal(const QString& journalId,
              const QDateTime& mtime, const QString& detail)
-    : detail(detail), journalID(journalID), saveTime(mtime)
+    : detail(detail), journalId(journalId), saveTime(mtime)
 {
     willAlarm = false;
     deleted = false;
 }
 
-LocalJournal::LocalJournal(const QString& journalID,
+LocalJournal::LocalJournal(const QString& journalId,
              const QDateTime& mtime, const QString& detail,
              const QDateTime& alarmTime)
-    : LocalJournal(journalID, mtime, detail)
+    : LocalJournal(journalId, mtime, detail)
 {
     willAlarm = true;
     this->alarmTime = alarmTime;
@@ -61,13 +61,13 @@ void LocalJournal::clear()
     willAlarm = false;
     alarmTime = QDateTime();
     saveTime = QDateTime();
-    journalID = "";
+    journalId = "";
 }
 
 void LocalJournal::generalizeID()
 {
     QDateTime current = QDateTime::currentDateTimeUtc();
-    journalID = QString::number(
+    journalId = QString::number(
                 QDateTime(QDate(1970, 1, 1), QTime(0, 0)).secsTo(current));
 }
 

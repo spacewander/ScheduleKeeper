@@ -34,6 +34,10 @@ Net::Net(QObject *parent) :
     detailJournalPath = QUrl(Prefix + "DetailJournal");
     resFindUser = nullptr;
     resRegisterUser = nullptr;
+    resGetBasicJournal = nullptr;
+    resGetDetailJournal = nullptr;
+    resUpdateBasicJournal = nullptr;
+    resUpdateDetailJournal = nullptr;
 }
 
 bool Net::isConnectedToNet()
@@ -63,7 +67,7 @@ bool Net::postUser(const QString& username, const QString& password,
     user["username"] = username;
     user["password"] = password;
     user["salt"] = salt;
-    qDebug() << QJsonDocument(user).toJson();
+
     resRegisterUser = netAccess->post(req, QJsonDocument(user).toJson());
     blockUntilFinished(resRegisterUser);
     bool status = checkStatusCode(resRegisterUser);
@@ -77,29 +81,37 @@ QList<BasicJournal> Net::getBasicJournalList()
 
 }
 
-bool Net::addDeletedToBasicJournalList(QList<BasicJournal>& list)
+const QString Net::addDeletedToBasicJournalList(const QList<BasicJournal>& list)
 {
 
 }
 
-bool Net::updateBasicJournal(const BasicJournal& journal)
+const QString Net::updateSaveTimeForBasicJournalList(const
+                                           QList<BasicJournal>& list)
 {
 
 }
 
-bool Net::updateDetailJournal(const DetailJournal& journal)
+bool Net::updateBasicJournal(const QList<BasicJournal>& willDelete, 
+                            const QList<BasicJournal>& willUpdate,
+                            const QList<BasicJournal>& willPost)
 {
 
 }
 
-const BasicJournal Net::findBasicJournal(const QString& journalID)
+bool Net::updateDetailJournal(const QList<DetailJournal>& willPost,
+                              const QList<DetailJournal>& willPut)
 {
 
 }
 
-const DetailJournal Net::findDetailJournal(const QString& journalID)
+bool Net::getDetailJournal(const QList<QString>& objectIds)
 {
 
+}
+
+bool Net::mergeDetailJournal(const QList<QString>& objectIds)
+{
 }
 
 QPair<QString, QString> Net::userFound()

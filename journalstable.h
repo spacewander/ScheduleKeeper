@@ -15,7 +15,7 @@
  * detail text,
  * savetime datetime,
  * alarmtime datetime,
- * journalID varchar(12),
+ * journalId varchar(12),
  * deleted boolean,
  * userName varchar(40),
  * willalarm boolean
@@ -27,7 +27,7 @@ class JournalsTable : public QObject
     Q_OBJECT
 public:
     static JournalsTable* getJournalsTable();
-    bool deleteJournal(const QString& journalID);
+    bool deleteJournal(const QString& journalId);
     bool updateJournal(const LocalJournal& newJournal);
     bool insertJournal(const LocalJournal& journal);
     const QList<LocalJournal>& selectJournal(SortBy sortBy);

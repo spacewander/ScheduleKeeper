@@ -13,9 +13,9 @@ class LocalJournal
 public:
     // 默认构造函数用于在日程编辑面板中，这样该面板就能保存一个空的日程了
     LocalJournal();
-    LocalJournal(const QString& journalID,
+    LocalJournal(const QString& journalId,
                  const QDateTime& mtime, const QString& detail);
-    LocalJournal(const QString& journalID,
+    LocalJournal(const QString& journalId,
                  const QDateTime& mtime, const QString& detail,
                  const QDateTime& alarmTime);
     /**
@@ -35,7 +35,7 @@ public:
     QDateTime alarmTime;
     bool willAlarm;
     // a timestamp from 1970-01-01 or ""
-    QString journalID;
+    QString journalId;
     QDateTime saveTime;
 
     bool deleted;

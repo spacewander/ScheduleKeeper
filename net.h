@@ -28,12 +28,20 @@ public:
     /// create User by post his/her data to cloud
     bool postUser(const QString& username, const QString& password,
                   const QString& salt);
+
     QList<BasicJournal> getBasicJournalList();
-    bool addDeletedToBasicJournalList(QList<BasicJournal>& list);
-    bool updateBasicJournal(const BasicJournal& journal);
-    bool updateDetailJournal(const DetailJournal& journal);
-    const BasicJournal findBasicJournal(const QString& journalID);
-    const DetailJournal findDetailJournal(const QString& journalID);
+    /// 更新要添加delete标记和要修改saveTime的以及要创建的BasicJournal
+    bool updateBasicJournal(const QList<BasicJournal>& willDelete, 
+                            const QList<BasicJournal>& willUpdate,
+                            const QList<BasicJournal>& willPost);
+    
+    /// 更新要创建的DetailJournal和要修改的DetailJournal
+    bool updateDetailJournal(const QList<DetailJournal>& willPost,
+                             const QList<DetailJournal> &willPut);
+    /// 获取要新增的DetailJournal
+    bool getDetailJournal(const QList<QString>& objectIds);
+    /// 获取要合并的DetailJournal
+    bool mergeDetailJournal(const QList<QString>& objectIds);
 
 signals:
     /**
@@ -52,12 +60,22 @@ private:
     QJsonArray getJSONResult(QNetworkReply *res);
     QPair<QString, QString>  userFound();
 
+    const QString addDeletedToBasicJournalList(const
+                                               QList<BasicJournal>& list);
+    const QString updateSaveTimeForBasicJournalList(const
+                                               QList<BasicJournal>& list);
+
+
     QNetworkAccessManager* netAccess;
     QUrl userPath;
     QUrl basicJournalPath;
     QUrl detailJournalPath;
     QNetworkReply* resFindUser;
     QNetworkReply* resRegisterUser;
+    QNetworkReply* resGetBasicJournal;
+    QNetworkReply* resGetDetailJournal;
+    QNetworkReply* resUpdateDetailJournal;
+    QNetworkReply* resUpdateBasicJournal;
 };
 
 bool isConnected();

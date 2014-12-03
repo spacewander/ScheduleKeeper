@@ -33,7 +33,7 @@ public slots:
     void startNewJournal();
 
 signals:
-    void deleteLocalJournal(const QString& journalID);
+    void deleteLocalJournal(const QString& journalId);
     void saveLocalJournal(const LocalJournal& journal);
     void createLocalJournal(LocalJournal& journal);
 

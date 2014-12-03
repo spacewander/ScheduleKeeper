@@ -19,7 +19,7 @@ public:
      * @brief removeJournalWithID
      * called when journal is deleted
      */
-    bool removeJournalWithID(const QString& journalID);
+    bool removeJournalWithID(const QString& journalId);
     /**
      * @brief updateJournal
      * update specific row with new journal data

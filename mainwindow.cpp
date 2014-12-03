@@ -263,14 +263,14 @@ void MainWindow::sortJournalsBy(SortBy sortBy)
     journalListView->reset();
 }
 
-void MainWindow::deleteLocalJournal(const QString& journalID)
+void MainWindow::deleteLocalJournal(const QString& journalId)
 {
-    qWarning() << "delete localjournal: " << journalID;
-    // update where journalID = xxx ...
+    qWarning() << "delete localjournal: " << journalId;
+    // update where journalId = xxx ...
     JournalsTable* table = JournalsTable::getJournalsTable();
-    table->deleteJournal(journalID);
-    if (!journalList.removeJournalWithID(journalID)) {
-        qWarning() << "can not delete journalID: " << journalID;
+    table->deleteJournal(journalId);
+    if (!journalList.removeJournalWithID(journalId)) {
+        qWarning() << "can not delete journalId: " << journalId;
     }
     journalListView->reset();
 }
@@ -278,11 +278,11 @@ void MainWindow::deleteLocalJournal(const QString& journalID)
 void MainWindow::saveLocalJournal(const LocalJournal& journal)
 {
     logSaveLocalJournal(journal);
-    // update where journalID = xxx.journalID
+    // update where journalId = xxx.journalId
     JournalsTable* table = JournalsTable::getJournalsTable();
     table->updateJournal(journal);
     if (!journalList.updateJournal(journal)) {
-        qWarning() << "can not save journalID: " << journal.journalID;
+        qWarning() << "can not save journalId: " << journal.journalId;
     }
     journalListView->reset();
 }
@@ -296,7 +296,7 @@ void MainWindow::createLocalJournal(LocalJournal& journal)
     table->insertJournal(journal);
     journal.userName = username;
     if (!journalList.addJournal(journal)) {
-        qWarning() << "can not create journalID: " << journal.journalID;
+        qWarning() << "can not create journalId: " << journal.journalId;
     }
     journalListView->reset();
 }

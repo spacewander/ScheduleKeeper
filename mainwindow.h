@@ -38,7 +38,7 @@ public:
     void setUsername(const QString& username);
 
 public slots:
-    void deleteLocalJournal(const QString& journalID);
+    void deleteLocalJournal(const QString& journalId);
     void saveLocalJournal(const LocalJournal&);
     void createLocalJournal(LocalJournal &);
     void logout();
@@ -59,6 +59,26 @@ private slots:
      * 清除搜索信息，展示所有的LocalJournal
      */
     void switchSearchToDisplay();
+    /**
+     *  更新逻辑：
+     *  0. 拉取所有的BasicJournal # getBasicJournalList
+     *  1. 排序LocalJournal和BasicJournal，然后遍历两个列表
+     *  2. 对于在Local而不在Basic的，如果没有deleted标记，加入到willPost列表
+     *  3. 对于在Basic而不在Local的，如果没有deleted标记，
+     *  将对应的DetailJournal的objectId加入到willGet列表
+     *  4. 对于两个都在的journal，如下处理
+     *  4.1 如果任意一个有deleted标记，对另一个也做delete标记处理。
+     *  如果是Basic，加入到willDelete列表
+     *  4.2 如果Local的saveTime比Basic的saveTime更晚，将Basic加入到willUpdate列表，将对应的DetailJournal的objectId加入willPut列表
+     *  4.3 如果Local的saveTime比Basic的saveTime更早，更新Local的saveTime，
+     *  将对应的DetailJournal的objectId加入到willMerge列表
+     *  5 分别调用函数来处理willPost\willGet\willDelete\willUpdate\willPut\willMerge
+     *  willGet : getDetailJournal
+     *  willPut willPost : updateDetailJournal
+     *  willMerge : mergeDetailJournal
+     *  willDelete willUpdate : updateBasicJournal
+     *  6 四个函数都处理完毕后，发布同步完毕的信息
+     */
     void updateJournals();
 
 private:

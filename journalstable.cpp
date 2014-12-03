@@ -36,19 +36,19 @@ JournalsTable::JournalsTable(QObject *parent) :
     }
 }
 
-bool JournalsTable::deleteJournal(const QString &journalID)
+bool JournalsTable::deleteJournal(const QString &journalId)
 {
-    journals->setFilter(QString(" journalID = '%1'").arg(journalID));
+    journals->setFilter(QString(" journalId = '%1'").arg(journalId));
     select();
     if (journals->rowCount() == 1) {
 //        do not actually delete
 //        journals->removeRows(0,1);
         LocalJournal journal;
-        journal.journalID = journalID;
+        journal.journalId = journalId;
         return updateJournal_(0, journal);
     }
     else {
-        qDebug() << "delete: journalID " + journalID + " not found!";
+        qDebug() << "delete: journalId " + journalId + " not found!";
         return false;
     }
     return submitAll();
@@ -56,13 +56,13 @@ bool JournalsTable::deleteJournal(const QString &journalID)
 
 bool JournalsTable::updateJournal(const LocalJournal &newJournal)
 {
-    journals->setFilter(QString(" journalID = '%1'").arg(newJournal.journalID));
+    journals->setFilter(QString(" journalId = '%1'").arg(newJournal.journalId));
     select();
     if (journals->rowCount() == 1) {
         return updateJournal_(0, newJournal);
     }
     else {
-        qDebug() << "update: journalID " + newJournal.journalID + " not found!";
+        qDebug() << "update: journalId " + newJournal.journalId + " not found!";
         return false;
     }
     return submitAll();
@@ -81,7 +81,7 @@ bool JournalsTable::updateJournal_(int row, const LocalJournal &journal)
     journals->setData(journals->index(row, 0), journal.detail);
     journals->setData(journals->index(row, 1), journal.saveTime);
     journals->setData(journals->index(row, 2), journal.alarmTime);
-    journals->setData(journals->index(row, 3), journal.journalID);
+    journals->setData(journals->index(row, 3), journal.journalId);
     journals->setData(journals->index(row, 4), journal.deleted);
     journals->setData(journals->index(row, 5), journal.userName);
     journals->setData(journals->index(row, 6), journal.willAlarm);
@@ -156,14 +156,14 @@ const QList<LocalJournal>& JournalsTable::searchJournal(const QString& query)
 
 LocalJournal JournalsTable::combineJournal(int row)
 {
-    QString journalID = journals->record(row).value("journalID").toString();
+    QString journalId = journals->record(row).value("journalId").toString();
     QString detail = journals->record(row).value("detail").toString();
     QDateTime mtime = journals->record(row).value("savetime").toDateTime();
     QDateTime alarmtime = journals->record(row).value("alarmtime").toDateTime();
     bool deleted = journals->record(row).value("deleted").toBool();
     bool willAlarm = journals->record(row).value("willalarm").toBool();
     QString userName = journals->record(row).value("userName").toString();
-    LocalJournal journal(journalID, mtime, detail, alarmtime);
+    LocalJournal journal(journalId, mtime, detail, alarmtime);
     journal.willAlarm = willAlarm;
     journal.deleted = deleted;
     journal.userName = userName;

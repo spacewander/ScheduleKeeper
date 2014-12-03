@@ -49,11 +49,11 @@ int JournalListModel::rowCount(const QModelIndex &parent) const
     return 0;
 }
 
-bool JournalListModel::removeJournalWithID(const QString& journalID)
+bool JournalListModel::removeJournalWithID(const QString& journalId)
 {
     auto end = journals.end();
     for (auto it = journals.begin(); it != end; it++) {
-        if ((*it).journalID == journalID) {
+        if ((*it).journalId == journalId) {
             journals.erase(it);
             return true;
         }
@@ -71,7 +71,7 @@ bool JournalListModel::updateJournal(const LocalJournal &journal)
 {
     auto end = journals.end();
     for (auto it = journals.begin(); it != end; it++) {
-        if ((*it).journalID == journal.journalID) {
+        if ((*it).journalId == journal.journalId) {
             *it = journal;
             return true;
         }

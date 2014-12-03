@@ -15,7 +15,7 @@ EditJournalPanel::EditJournalPanel(QWidget *parent) :
     saveBtn = new QPushButton(this);
     saveBtn->setText(tr("创建"));
     connect(saveBtn, &QPushButton::clicked, [&](){
-        if (editingJournal.journalID == "") {
+        if (editingJournal.journalId == "") {
             createJournal();
         }
         else {
@@ -96,7 +96,7 @@ void EditJournalPanel::deleteJournal()
 {
     // if there is journal editing
     if (!editingJournal.deleted) {
-        emit deleteLocalJournal(editingJournal.journalID);
+        emit deleteLocalJournal(editingJournal.journalId);
         editingJournal.clear();
         initEditState();
     }
