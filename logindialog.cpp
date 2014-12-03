@@ -1,5 +1,6 @@
 #include <QByteArray>
 #include <QSettings>
+#include <QTime>
 
 #include "global.h"
 #include "logindialog.h"
@@ -178,15 +179,36 @@ void LoginDialog::registerUser()
     }
     else {
         editPassword->clear();
-        noticeLabel->setText(tr("注册失败，需要有网络"));
+        ensurePassword->clear();
         noticeLabel->setVisible(true);
     }
 }
 
 bool LoginDialog::canRegister(const QString& username, const QString& password)
 {
-    if (username == "a" && password == "b") {
-        return true;
+    if (isConnected()) {
+        QString salt = generalizeSalt();
+        QString pass = UsersTable::getUsersTable()->encrypt(password, salt).data();
+        if (Net::getNetManager()->postUser(username, pass, salt)) {
+            // 存储用户信息到本地
+            storeUserToDB(username, pass, salt);
+            return true;
+        }
+        noticeLabel->setText(tr("注册失败"));
+    }
+    else {
+       noticeLabel->setText(tr("注册失败，需要有网络"));
     }
     return false;
+}
+
+const QString LoginDialog::generalizeSalt() const
+{
+    qsrand(QTime::currentTime().msecsSinceStartOfDay());
+    QString seq(5, 'a');
+    for (int i = 0; i < 5; ++i) {
+        seq[i] = qrand() % 26 + 'a';
+    }
+    qWarning() << "salt: " << seq;
+    return seq;
 }

@@ -31,6 +31,11 @@ public:
     bool checkUserOk(const QString& username, const QString& password);
     bool insertUser(const QString& username, const QString& password,
                     const QString& salt);
+    /**
+     * @brief encrypt
+     * encrypt with user-entered password and generalized salt
+     */
+    const QByteArray encrypt(const QString& pass, const QString& salt);
 signals:
 
 public slots:
@@ -39,8 +44,7 @@ private:
     explicit UsersTable(QObject *parent = 0);
     explicit UsersTable(const UsersTable&);
     UsersTable operator =(UsersTable&);
-    const QPair<QString, QString> find_by_username(const QString& username);
-    const QByteArray encrypt(const QString& pass, const QString& salt);
+    const QPair<QString, QString> find_by_username(const QString& username);    
     /// checked select
     bool select();
     /// checked submitAll

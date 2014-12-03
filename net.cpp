@@ -3,6 +3,7 @@
 #include <QEventLoop>
 #include <QJsonDocument>
 #include <QMessageBox>
+#include <QUrlQuery>
 
 #include "net.h"
 
@@ -42,9 +43,11 @@ bool Net::isConnectedToNet()
 
 QPair<QString, QString> Net::getUser(const QString& username)
 {
-    QNetworkRequest req = QNetworkRequest(QUrl(userPath));
+    QUrl findUserPath(userPath);
+    QUrlQuery findUserQuery(QString("where={\"username\":\"%1\"}").arg(username));
+    findUserPath.setQuery(findUserQuery);
+    QNetworkRequest req = QNetworkRequest(findUserPath);
     setCommonHeader(&req);
-    // add Query
 
     resFindUser = netAccess->get(req);
     blockUntilFinished(resFindUser);
@@ -54,7 +57,19 @@ QPair<QString, QString> Net::getUser(const QString& username)
 bool Net::postUser(const QString& username, const QString& password,
               const QString& salt)
 {
-
+    QNetworkRequest req = QNetworkRequest(QUrl(userPath));
+    setCommonHeader(&req);
+    QJsonObject user;
+    user["username"] = username;
+    user["password"] = password;
+    user["salt"] = salt;
+    qDebug() << QJsonDocument(user).toJson();
+    resRegisterUser = netAccess->post(req, QJsonDocument(user).toJson());
+    blockUntilFinished(resRegisterUser);
+    bool status = checkStatusCode(resRegisterUser);
+    if (status)
+        resRegisterUser->deleteLater();
+    return status;
 }
 
 QList<BasicJournal> Net::getBasicJournalList()
@@ -94,6 +109,7 @@ QPair<QString, QString> Net::userFound()
         QJsonArray json = getJSONResult(resFindUser);
         pass_with_salt.first = json.first().toObject()["password"].toString();
         pass_with_salt.second = json.first().toObject()["salt"].toString();
+        resFindUser->deleteLater();
     }
     else {
         pass_with_salt.first = "";
@@ -112,6 +128,7 @@ void Net::setCommonHeader(QNetworkRequest *req)
 bool Net::checkStatusCode(QNetworkReply *res)
 {
     if (res->error() != QNetworkReply::NoError) {
+        qDebug() << res->readAll().data();
         QMessageBox::information(nullptr, tr("Connection"),tr("Failed: %1").arg(res->errorString()));
         res->deleteLater();
         return false;

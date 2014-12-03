@@ -53,6 +53,8 @@ private:
         void storeUsernameToSetting(const QString& username);
         void storeUserToDB(const QString& username, const QString& password, 
                 const QString& salt);
+        /// the salt is an alnum char seq with length of 5
+        const QString generalizeSalt() const;
 
 public:
     explicit LoginDialog(QWidget *parent = 0);
