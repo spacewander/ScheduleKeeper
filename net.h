@@ -29,7 +29,12 @@ public:
     bool postUser(const QString& username, const QString& password,
                   const QString& salt);
 
-    QList<BasicJournal> getBasicJournalList();
+    // all const QString QList should be used to fetch relative journals
+    // all non-const Journal QLists should be filled with remote data
+    // all const Journal QLists should be sent to remote
+
+    /// 获取要同步的当前所有BasicJournal
+    bool getBasicJournalList(QList<BasicJournal>& journals);
     /// 更新要添加delete标记和要修改saveTime的以及要创建的BasicJournal
     bool updateBasicJournal(const QList<BasicJournal>& willDelete, 
                             const QList<BasicJournal>& willUpdate,
@@ -39,7 +44,7 @@ public:
     bool updateDetailJournal(const QList<DetailJournal>& willPost,
                              const QList<DetailJournal> &willPut);
     /// 获取要新增的DetailJournal
-    bool getDetailJournal(const QList<QString>& objectIds);
+    bool getDetailJournal(const QList<QString>& objectIds, QList<DetailJournal>& journals);
     /// 获取要合并的DetailJournal
     bool mergeDetailJournal(const QList<QString>& objectIds);
 
@@ -57,7 +62,10 @@ private:
     void setCommonHeader(QNetworkRequest *req);
     bool checkStatusCode(QNetworkReply *res);
     void blockUntilFinished(QNetworkReply* res);
+    /// used to Get all instances of a class
     QJsonArray getJSONResult(QNetworkReply *res);
+    /// used to Get all results of a batch query
+    QJsonArray getBatchJSONResult(QNetworkReply *res);
     QPair<QString, QString>  userFound();
 
     const QString addDeletedToBasicJournalList(const
@@ -67,6 +75,7 @@ private:
 
 
     QNetworkAccessManager* netAccess;
+    QUrl batchPath;
     QUrl userPath;
     QUrl basicJournalPath;
     QUrl detailJournalPath;

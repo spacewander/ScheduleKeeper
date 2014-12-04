@@ -12,7 +12,7 @@ void BasicJournal::read(const QJsonObject &json)
     deleted = json["deleted"].toBool();
     saveTime = QDateTime::fromString(json["saveTime"].toString());
     username = json["username"].toString();
-    objectId = json["objectId"].toString();
+    detailObjectId = json["detailObjectId"].toString();
 }
 
 void BasicJournal::write(QJsonObject &json) const
@@ -21,5 +21,5 @@ void BasicJournal::write(QJsonObject &json) const
     json["deleted"] = deleted;
     json["saveTime"] = saveTime.toString();
     json["username"] = username;
-    json["objectId"] = objectId;
+    json["detailObjectId"] = detailObjectId;
 }

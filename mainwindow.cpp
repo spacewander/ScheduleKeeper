@@ -1,11 +1,14 @@
 #include <QDebug>
 #include <QIcon>
+#include <QMessageBox>
 #include <QtSql>
 
 #include "mainwindow.h"
 #include "editjournalpanel.h"
 #include "logindialog.h"
 #include "journalstable.h"
+#include "net.h"
+#include "remotejournal.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -166,13 +169,39 @@ void MainWindow::setUpJournals()
 
 void MainWindow::updateJournals()
 {
+    Net* net = Net::getNetManager();
+
+    QList<BasicJournal> journals;
+    if (!(net->getBasicJournalList(journals))) {
+        QMessageBox::information(this, tr("同步失败"), tr("无法获取云端日程"));
+        return;
+    }
+    qWarning() << "update: Get BasicJournal " << journals.size();
+
+    QList<QString> objectIds;
+    for (auto i : journals) {
+        objectIds.push_back(i.detailObjectId);
+    }
+    qWarning() << "update: Will Get DetailJournal " << objectIds.size();
+    QList<DetailJournal> journalsWillGet;
+    if (!(net->getDetailJournal(objectIds, journalsWillGet))) {
+        QMessageBox::information(this, tr("同步失败"), tr("无法获取云端日程"));
+        return;
+    }
+    qWarning() << "update: Get DetailJournal " << journalsWillGet.size();
+    if (journalsWillGet.size() != objectIds.size()) {
+        QMessageBox::information(this, tr("同步失败"), tr("无法获取云端日程"));
+        return;
+    }
+
+    refreshLastUpdateTime();
 }
 
 void MainWindow::refreshLastUpdateTime()
 {
     qWarning() << "before lastupdatetime: " << settings.value("lastupdatetime").toString();
     lastUpdateTime = QDateTime::currentDateTime();
-    QString lastupdatetime = lastUpdateTime.toString("yyyy.MM.dd.hh.mm");
+    QString lastupdatetime = lastUpdateTime.toString("yyyy年MM月dd日hh时mm分");
     lastUpdateLabel->setText(lastupdatetime);
     settings.setValue("lastupdatetime", lastupdatetime);
     qWarning() << "after lastupdatetime: " << settings.value("lastupdatetime").toString();

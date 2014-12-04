@@ -10,16 +10,24 @@ void DetailJournal::read(const QJsonObject &json)
 {
     journalId = json["journalId"].toString();
     username = json["username"].toString();
-    objectId = json["objectId"].toString();
     detail = json["detail"].toString();
-    reminder = QDateTime::fromString(json["reminder"].toString());
+    if (json["reminder"] != QString("")) {
+        reminder = QDateTime::fromString(json["reminder"].toString());
+    }
+    else {
+        reminder = QDateTime();
+    }
 }
 
 void DetailJournal::write(QJsonObject &json) const
 {
     json["journalId"] = journalId;
     json["username"] = username;
-    json["objectId"] = objectId;
     json["detail"] = detail;
-    json["reminder"] = reminder.toString();
+    if (reminder.isValid()) {
+        json["reminder"] = reminder.toString();
+    }
+    else {
+        json["reminder"] = QString("");
+    }
 }

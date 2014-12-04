@@ -18,7 +18,7 @@ public:
      * 当需要更新云端时（saveTime: local > remote 或者 两者有一个设置了deleted）
      * ，以该objectId作为路径的一部分
      */
-    QString objectId;
+    QString detailObjectId;
 
     void read(const QJsonObject &json);
     void write(QJsonObject &json) const;

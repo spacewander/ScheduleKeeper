@@ -7,7 +7,8 @@
 
 #include "net.h"
 
-const QString Prefix = "https://leancloud.cn/1.1/classes/";
+const QString Prefix = "https://leancloud.cn/1.1/";
+const QString batchReqPrefix = "/1.1/classes/";
 const QByteArray AppIDHeader("X-AVOSCloud-Application-Id" );
 const QByteArray AppID("a5m764pwiwtgqfskkf9rdaxhn8fre7hszfwxxb9wqa9f3m3a");
 const QByteArray AppKeyHeader("X-AVOSCloud-Application-Key");
@@ -29,9 +30,10 @@ Net::Net(QObject *parent) :
     QObject(parent)
 {
     netAccess = new QNetworkAccessManager();
-    userPath = QUrl(Prefix + "User");
-    basicJournalPath = QUrl(Prefix + "BasicJournal");
-    detailJournalPath = QUrl(Prefix + "DetailJournal");
+    userPath = QUrl(Prefix + "classes/User");
+    basicJournalPath = QUrl(Prefix + "classes/BasicJournal");
+    detailJournalPath = QUrl(Prefix + "classes/DetailJournal");
+    batchPath = QUrl(Prefix + "batch");
     resFindUser = nullptr;
     resRegisterUser = nullptr;
     resGetBasicJournal = nullptr;
@@ -76,9 +78,23 @@ bool Net::postUser(const QString& username, const QString& password,
     return status;
 }
 
-QList<BasicJournal> Net::getBasicJournalList()
+bool Net::getBasicJournalList(QList<BasicJournal> &journals)
 {
+    QNetworkRequest req = QNetworkRequest(basicJournalPath);
+    setCommonHeader(&req);
 
+    resGetBasicJournal = netAccess->get(req);
+    blockUntilFinished(resGetBasicJournal);
+    bool ok = false;
+    if ((ok = checkStatusCode(resGetBasicJournal))) {
+        QJsonArray json = getJSONResult(resGetBasicJournal);
+        for (auto i : json) {
+            BasicJournal journal;
+            journal.read(i.toObject());
+            journals.push_back(journal);
+        }
+    }
+    return ok;
 }
 
 const QString Net::addDeletedToBasicJournalList(const QList<BasicJournal>& list)
@@ -105,9 +121,36 @@ bool Net::updateDetailJournal(const QList<DetailJournal>& willPost,
 
 }
 
-bool Net::getDetailJournal(const QList<QString>& objectIds)
+ bool Net::getDetailJournal(const QList<QString>& objectIds, QList<DetailJournal> &journals)
 {
+    if (objectIds.size() == 0)
+        return true;
+    QJsonObject batch;
+    QJsonArray getDetailJournals;
+    for (auto i : objectIds) {
+        QJsonObject req;
+        req["method"] = QString("GET");
+        req["path"] = batchReqPrefix + "DetailJournal/" + i;
+        getDetailJournals.push_back(req);
+    }
+    batch["requests"] = getDetailJournals;
 
+    QNetworkRequest req = QNetworkRequest(batchPath);
+    setCommonHeader(&req);
+    qDebug() << QJsonDocument(batch).toJson();
+    resGetDetailJournal = netAccess->post(req, QJsonDocument(batch).toJson());
+    blockUntilFinished(resGetDetailJournal);
+
+    bool ok = false;
+    if ((ok = checkStatusCode(resGetDetailJournal))) {
+        QJsonArray json = getBatchJSONResult(resGetDetailJournal);
+        for (auto i : json) {
+            DetailJournal journal;
+            journal.read(i.toObject());
+            journals.push_back(journal);
+        }
+    }
+    return ok;
 }
 
 bool Net::mergeDetailJournal(const QList<QString>& objectIds)
@@ -121,7 +164,6 @@ QPair<QString, QString> Net::userFound()
         QJsonArray json = getJSONResult(resFindUser);
         pass_with_salt.first = json.first().toObject()["password"].toString();
         pass_with_salt.second = json.first().toObject()["salt"].toString();
-        resFindUser->deleteLater();
     }
     else {
         pass_with_salt.first = "";
@@ -141,7 +183,8 @@ bool Net::checkStatusCode(QNetworkReply *res)
 {
     if (res->error() != QNetworkReply::NoError) {
         qDebug() << res->readAll().data();
-        QMessageBox::information(nullptr, tr("Connection"),tr("Failed: %1").arg(res->errorString()));
+        QMessageBox::information(nullptr, tr("Connection"),
+                                 tr("Failed: %1").arg(res->errorString()));
         res->deleteLater();
         return false;
     }
@@ -159,8 +202,24 @@ QJsonArray Net::getJSONResult(QNetworkReply *res)
 {
     QByteArray content = res->readAll();
     res->deleteLater();
-    qWarning() << "get user info: " << content;
+    qWarning() << "Url: " << res->url().toString() << " return: " << content;
     return QJsonDocument::fromJson(content).object()["results"].toArray();
+}
+
+QJsonArray Net::getBatchJSONResult(QNetworkReply *res)
+{
+    QByteArray content = res->readAll();
+    res->deleteLater();
+    qWarning() << "Batch url: " << res->url().toString() << " return: " << content;
+    // if no array received, response will be empty
+    QJsonArray response = QJsonDocument::fromJson(content).array();
+    QJsonArray results;
+    for (auto i : response) {
+        if (i.toObject()["success"] != QJsonValue::Undefined) {
+            results.push_back(i.toObject()["success"]);
+        }
+    }
+    return results;
 }
 
 bool isConnected()
