@@ -1,4 +1,5 @@
 #include <QJsonObject>
+#include <QVariant>
 
 #include "detailjournal.h"
 #include "localjournal.h"
@@ -26,7 +27,7 @@ void DetailJournal::read(const QJsonObject &json)
     username = json["username"].toString();
     detail = json["detail"].toString();
     if (json["reminder"] != QString("")) {
-        reminder = QDateTime::fromString(json["reminder"].toString());
+        reminder = json["reminder"].toVariant().toDateTime();
     }
     else {
         reminder = QDateTime();

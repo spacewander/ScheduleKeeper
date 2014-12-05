@@ -1,4 +1,5 @@
 #include <QJsonObject>
+#include <QVariant>
 
 #include "basicjournal.h"
 #include "localjournal.h"
@@ -20,7 +21,7 @@ void BasicJournal::read(const QJsonObject &json)
 {
     journalId = json["journalId"].toString();
     deleted = json["deleted"].toBool();
-    saveTime = QDateTime::fromString(json["saveTime"].toString());
+    saveTime = json["saveTime"].toVariant().toDateTime();
     username = json["username"].toString();
     detailObjectId = json["detailObjectId"].toString();
 }

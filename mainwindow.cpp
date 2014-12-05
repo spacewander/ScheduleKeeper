@@ -257,7 +257,7 @@ void MainWindow::updateJournals()
                         willPutD.push_back(d);
                     }
                     // there is change in remote journal
-                    else if ((*i).saveTime > (*j).saveTime){
+                    else if ((*i).saveTime > (*j).saveTime) {
                         LocalJournal tmp(*j);
                         tmp.saveTime = (*i).saveTime;
                         shouldMerge[tmp.journalId] = tmp;
@@ -313,7 +313,7 @@ void MainWindow::updateJournals()
         updateFailed();
         return;
     }
-    qWarning() << "update: Merge DetailJournal " << willMerge.size();
+    qWarning() << "update Merge DetailJournal " << willMerge.size();
     if (willMerge.size() != willMergeObjectIds.size()) {
         updateFailed();
         return;
@@ -330,6 +330,7 @@ void MainWindow::updateJournals()
         }
     }
 
+    qDebug() << "should Delete " << shouldDelete.size();
     updateAction->setText(tr("同步"));
     flushLocalChangeToDB(shouldDelete);
     flushLocalChangeToDB(shouldGet);
