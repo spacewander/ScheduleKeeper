@@ -1,9 +1,23 @@
 #include <QJsonObject>
 
 #include "detailjournal.h"
+#include "localjournal.h"
 
 DetailJournal::DetailJournal()
 {
+}
+
+DetailJournal::DetailJournal(const LocalJournal &journal)
+{
+    journalId = journal.journalId;
+    username = journal.userName;
+    detail = journal.detail;
+    if (journal.willAlarm) {
+        reminder = journal.alarmTime;
+    }
+    else {
+        reminder = QDateTime();
+    }
 }
 
 void DetailJournal::read(const QJsonObject &json)

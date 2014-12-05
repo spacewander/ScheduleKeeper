@@ -4,6 +4,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QList>
+#include <QMap>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
@@ -35,18 +36,22 @@ public:
 
     /// 获取要同步的当前所有BasicJournal
     bool getBasicJournalList(QList<BasicJournal>& journals);
-    /// 更新要添加delete标记和要修改saveTime的以及要创建的BasicJournal
-    bool updateBasicJournal(const QList<BasicJournal>& willDelete, 
-                            const QList<BasicJournal>& willUpdate,
-                            const QList<BasicJournal>& willPost);
+    /// 更新要添加delete标记和要修改saveTime的BasicJournal
+    bool updateBasicJournal(const QList<BasicJournal>& willPut);
     
-    /// 更新要创建的DetailJournal和要修改的DetailJournal
-    bool updateDetailJournal(const QList<DetailJournal>& willPost,
-                             const QList<DetailJournal> &willPut);
+    /// 更新要修改的DetailJournal
+    bool updateDetailJournal(const QList<DetailJournal> &willPut);
+    /**
+     * 更新要创建的BasicJournal和要创建的DetailJournal
+     * 创建willPostD中的日程后，以获取的objectId更新willPostB中的日程，然后再去创建willPostB
+     */
+    bool updateRemoteJournal(QList<BasicJournal>& willPostB,
+                             const QList<DetailJournal>& willPostD);
     /// 获取要新增的DetailJournal
     bool getDetailJournal(const QList<QString>& objectIds, QList<DetailJournal>& journals);
     /// 获取要合并的DetailJournal
-    bool mergeDetailJournal(const QList<QString>& objectIds);
+    bool mergeDetailJournal(const QList<QString>& objectIds, 
+            QMap<QString, DetailJournal>& journals);
 
 signals:
     /**
@@ -67,12 +72,6 @@ private:
     /// used to Get all results of a batch query
     QJsonArray getBatchJSONResult(QNetworkReply *res);
     QPair<QString, QString>  userFound();
-
-    const QString addDeletedToBasicJournalList(const
-                                               QList<BasicJournal>& list);
-    const QString updateSaveTimeForBasicJournalList(const
-                                               QList<BasicJournal>& list);
-
 
     QNetworkAccessManager* netAccess;
     QUrl batchPath;

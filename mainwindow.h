@@ -9,6 +9,7 @@
 #include <QList>
 #include <QListView>
 #include <QMainWindow>
+#include <QMap>
 #include <QMenu>
 #include <QSettings>
 #include <QToolBar>
@@ -84,14 +85,18 @@ private slots:
 private:
     void setUpGUI();
     void setUpJournals();
+    void updateFailed(const QString& msg = "") const;
     void connectEditJournalPanel();
     void sortJournalsBy(SortBy sortBy);
 
+    // 同步的辅助函数
     /**
      * @brief refreshLastUpdateTime
      * 更新最近一次更新的时间，会修改相关的UI
      */
     void refreshLastUpdateTime();
+    bool flushLocalChangeToDB(const QList<LocalJournal>& shouldDelete);
+    bool flushLocalChangeToDB(const QMap<QString, LocalJournal>& shouldMerge);
     QDateTime lastUpdateTime;
 
     QString username;

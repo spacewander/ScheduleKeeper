@@ -4,10 +4,13 @@
 #include <QDateTime>
 #include <QObject>
 
+class LocalJournal;
+
 class BasicJournal
 {
 public:
     BasicJournal();
+    BasicJournal(const LocalJournal &journal);
     QString journalId;
     bool deleted;
     QDateTime saveTime;
@@ -22,6 +25,14 @@ public:
 
     void read(const QJsonObject &json);
     void write(QJsonObject &json) const;
+    void deleteSelf();
 };
 
+bool operator <(const BasicJournal &a, const BasicJournal &b);
+bool operator <(const BasicJournal &a, const LocalJournal &b);
+bool operator <(const LocalJournal &a, const BasicJournal &b);
+bool operator ==(const LocalJournal &a, const BasicJournal &b);
+bool operator !=(const LocalJournal &a, const BasicJournal &b);
+bool operator ==(const BasicJournal &a, const LocalJournal &b);
+bool operator !=(const BasicJournal &a, const LocalJournal &b);
 #endif // BASICJOURNAL_H

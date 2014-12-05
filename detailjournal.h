@@ -4,10 +4,13 @@
 #include <QDateTime>
 #include <QObject>
 
+class LocalJournal;
+
 class DetailJournal
 {
 public:
     DetailJournal();
+    DetailJournal(const LocalJournal& journal);
     QString journalId;
     QString username;
     QDateTime reminder;

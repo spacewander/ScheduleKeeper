@@ -21,6 +21,7 @@ public:
     /**
      * @brief clear
      * 清理LocalJournal的状态到默认构造函数构造的状态
+     * 相当于delete了这个日程
      */
     void clear();
     /**
@@ -47,4 +48,5 @@ void logDeleteLocalJournal(const LocalJournal& journal);
 void logSaveLocalJournal(const LocalJournal& journal);
 void logCreateLocalJournal(const LocalJournal& journal);
 
+bool operator <(const LocalJournal& a, const LocalJournal& b);
 #endif // LOCALJOURNAL_H

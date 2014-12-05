@@ -1,9 +1,19 @@
 #include <QJsonObject>
 
 #include "basicjournal.h"
+#include "localjournal.h"
 
 BasicJournal::BasicJournal()
 {
+}
+
+BasicJournal::BasicJournal(const LocalJournal &journal)
+{
+    journalId = journal.journalId;
+    deleted = journal.deleted;
+    saveTime = journal.saveTime;
+    username = journal.userName;
+    detailObjectId = "";
 }
 
 void BasicJournal::read(const QJsonObject &json)
@@ -22,4 +32,46 @@ void BasicJournal::write(QJsonObject &json) const
     json["saveTime"] = saveTime.toString();
     json["username"] = username;
     json["detailObjectId"] = detailObjectId;
+}
+
+void BasicJournal::deleteSelf()
+{
+    deleted = true;
+    saveTime = QDateTime();
+}
+
+// journalId is 10 char fixed length string
+bool operator <(const BasicJournal &a, const BasicJournal &b)
+{
+    return a.journalId < b.journalId;
+}
+
+bool operator <(const BasicJournal &a, const LocalJournal &b)
+{
+    return (a.journalId < b.journalId);
+}
+
+bool operator <(const LocalJournal &a, const BasicJournal &b)
+{
+    return (a.journalId < b.journalId);
+}
+
+bool operator ==(const LocalJournal &a, const BasicJournal &b)
+{
+    return (a.journalId == b.journalId);
+}
+
+bool operator !=(const LocalJournal &a, const BasicJournal &b)
+{
+    return !(a == b);
+}
+
+bool operator ==(const BasicJournal &a, const LocalJournal &b)
+{
+    return (b == a);
+}
+
+bool operator !=(const BasicJournal &a, const LocalJournal &b)
+{
+    return !(b == a);
 }

@@ -97,28 +97,23 @@ bool Net::getBasicJournalList(QList<BasicJournal> &journals)
     return ok;
 }
 
-const QString Net::addDeletedToBasicJournalList(const QList<BasicJournal>& list)
+bool Net::updateBasicJournal(const QList<BasicJournal>& willPut)
 {
-
+    bool ok = true;
+    return ok;
 }
 
-const QString Net::updateSaveTimeForBasicJournalList(const
-                                           QList<BasicJournal>& list)
+bool Net::updateDetailJournal(const QList<DetailJournal>& willPut)
 {
-
+    bool ok = true;
+    return ok;
 }
 
-bool Net::updateBasicJournal(const QList<BasicJournal>& willDelete, 
-                            const QList<BasicJournal>& willUpdate,
-                            const QList<BasicJournal>& willPost)
+bool Net::updateRemoteJournal(QList<BasicJournal> &willPostB,
+                              const QList<DetailJournal> &willPostD)
 {
-
-}
-
-bool Net::updateDetailJournal(const QList<DetailJournal>& willPost,
-                              const QList<DetailJournal>& willPut)
-{
-
+    bool ok = true;
+    return ok;
 }
 
  bool Net::getDetailJournal(const QList<QString>& objectIds, QList<DetailJournal> &journals)
@@ -153,8 +148,11 @@ bool Net::updateDetailJournal(const QList<DetailJournal>& willPost,
     return ok;
 }
 
-bool Net::mergeDetailJournal(const QList<QString>& objectIds)
+bool Net::mergeDetailJournal(const QList<QString>& objectIds, 
+        QMap<QString, DetailJournal>& journals)
 {
+    bool ok = true;
+    return ok;
 }
 
 QPair<QString, QString> Net::userFound()

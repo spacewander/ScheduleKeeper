@@ -120,6 +120,7 @@ bool LoginDialog::canLogin(const QString& username, const QString& password)
     }
     // 否则在有网络的情况下，发送用户名和加密后的密码到云端进行验证
     if (isConnected()) {
+        qWarning() << "Request to get user";
 //        noticeLabel->setText(tr("正在尝试登录……"));
 //        noticeLabel->setVisible(true);
         QPair<QString, QString> pass_with_salt = Net::getNetManager()->getUser(username);

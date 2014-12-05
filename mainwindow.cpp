@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <QDebug>
 #include <QIcon>
 #include <QMessageBox>
@@ -167,34 +168,187 @@ void MainWindow::setUpJournals()
     sortJournalsBy(SortBySaveTime);
 }
 
+void MainWindow::updateFailed(const QString &msg) const
+{
+    QMessageBox::information(nullptr, tr("同步失败"), tr("无法获取云端日程\n%1").arg(msg));
+    updateAction->setText(tr("同步"));
+}
+
 void MainWindow::updateJournals()
 {
     Net* net = Net::getNetManager();
+    updateAction->setText(tr("开始同步"));
+    qWarning() << "before update: total local journals: " <<
+                  totalLocalJournals.size();
 
     QList<BasicJournal> journals;
     if (!(net->getBasicJournalList(journals))) {
-        QMessageBox::information(this, tr("同步失败"), tr("无法获取云端日程"));
+        updateFailed();
         return;
     }
     qWarning() << "update: Get BasicJournal " << journals.size();
 
-    QList<QString> objectIds;
-    for (auto i : journals) {
-        objectIds.push_back(i.detailObjectId);
+    if (journals.size() > 1) {
+        std::sort(journals.begin(), journals.end());
     }
-    qWarning() << "update: Will Get DetailJournal " << objectIds.size();
-    QList<DetailJournal> journalsWillGet;
-    if (!(net->getDetailJournal(objectIds, journalsWillGet))) {
-        QMessageBox::information(this, tr("同步失败"), tr("无法获取云端日程"));
+    if (totalLocalJournals.size() > 1) {
+        std::sort(totalLocalJournals.begin(), totalLocalJournals.end());
+    }
+
+    QList<QString> willGetObjectIds;
+    QList<QString> willMergeObjectIds;
+    QMap<QString, LocalJournal> shouldGet;
+    QList<LocalJournal> shouldDelete;
+    QMap<QString, LocalJournal> shouldMerge;
+    QList<BasicJournal> willPostB;
+    QList<BasicJournal> willPutB;
+    QList<DetailJournal> willPostD;
+    QList<DetailJournal> willPutD;
+    QList<DetailJournal> willGet;
+    QMap<QString, DetailJournal> willMerge;
+
+    auto j = totalLocalJournals.begin();
+    auto i = journals.begin();
+    // don't modify *j, modify its copy and store to shouldDelete
+    while (i != journals.end() || j != totalLocalJournals.end()) {
+        // remote journal later than local journal =>
+        // should upload these journals to remote
+        if (i == journals.end() || (*j) < (*i)) {
+            if (!((*j).deleted)) {
+                BasicJournal b(*j);
+                willPostB.push_back(b);
+                DetailJournal d(*j);
+                willPostD.push_back(d);
+            }
+            ++j;
+        }
+        // remote journal earlier than local journal => 
+        // should download these journals to local
+        else if (j == totalLocalJournals.end() || (*i) < (*j)) {
+            if (!((*i).deleted)) {
+                LocalJournal journal;
+                journal.deleted = false;
+                journal.saveTime = (*i).saveTime;
+                journal.journalId = (*i).journalId;
+                journal.userName = (*i).username;
+                shouldGet[(*i).journalId] = journal;
+                willGetObjectIds.push_back((*i).detailObjectId);
+            }
+            ++i;
+        }
+        // the remote journal and local journal have same journalId
+        else {
+            if ((*i).deleted) {
+                LocalJournal tmp(*j);
+                tmp.clear();
+                shouldDelete.push_back(tmp);
+            }
+            else if ((*j).deleted) {
+                (*i).deleteSelf();
+                willPutB.push_back(*i);
+            }
+            else {
+                if ((*i).saveTime.isValid() && (*j).saveTime.isValid()) {
+                    // there is change in local journal
+                    if ((*i).saveTime < (*j).saveTime) {
+                        BasicJournal b(*j);
+                        willPutB.push_back(b);
+                        DetailJournal d(*j);
+                        willPutD.push_back(d);
+                    }
+                    // there is change in remote journal
+                    else if ((*i).saveTime > (*j).saveTime){
+                        LocalJournal tmp(*j);
+                        tmp.saveTime = (*i).saveTime;
+                        shouldMerge[tmp.journalId] = tmp;
+                        willMerge[tmp.journalId] = DetailJournal();
+                        willMergeObjectIds.push_back((*i).detailObjectId);
+                    }
+                }
+            }
+            ++i;
+            ++j;
+        }
+    }
+
+    qWarning() << "update: Put BasicJournal " << willPutB.size();
+    if (!(net->updateBasicJournal(willPutB))) {
+        updateFailed();
         return;
     }
-    qWarning() << "update: Get DetailJournal " << journalsWillGet.size();
-    if (journalsWillGet.size() != objectIds.size()) {
-        QMessageBox::information(this, tr("同步失败"), tr("无法获取云端日程"));
+    qWarning() << "update: Put DetailJournal " << willPutD.size();
+    if (!(net->updateDetailJournal(willPutD))) {
+        updateFailed();
+        return;
+    }
+    qWarning() << "update: Post Journal " << willPostB.size();
+    if (!(net->updateRemoteJournal(willPostB, willPostD))) {
+        updateFailed();
         return;
     }
 
+    qWarning() << "update: Will Get DetailJournal " << willGetObjectIds.size();
+    if (!(net->getDetailJournal(willGetObjectIds, willGet))) {
+        updateFailed();
+        return;
+    }
+    qWarning() << "update: Get DetailJournal " << willGet.size();
+    if (willGet.size() != willGetObjectIds.size()) {
+        updateFailed();
+        return;
+    }
+    for (auto gotJournal : willGet) {
+        shouldGet[gotJournal.journalId].detail = gotJournal.detail;
+        if (gotJournal.reminder.isValid()) {
+            shouldGet[gotJournal.journalId].willAlarm = true;
+            shouldGet[gotJournal.journalId].alarmTime = gotJournal.reminder;
+        }
+        else {
+            shouldGet[gotJournal.journalId].willAlarm = false;
+        }
+    }
+
+    qWarning() << "update: Will Merge DetailJournal " << willMergeObjectIds.size();
+    if (!(net->mergeDetailJournal(willMergeObjectIds, willMerge))) {
+        updateFailed();
+        return;
+    }
+    qWarning() << "update: Merge DetailJournal " << willMerge.size();
+    if (willMerge.size() != willMergeObjectIds.size()) {
+        updateFailed();
+        return;
+    }
+    for (auto mergedJournal : shouldMerge) {
+        mergedJournal.userName = willMerge[mergedJournal.journalId].username;
+        mergedJournal.detail = willMerge[mergedJournal.journalId].detail;
+        if (willMerge[mergedJournal.journalId].reminder.isValid()) {
+            mergedJournal.willAlarm = true;
+            mergedJournal.alarmTime = willMerge[mergedJournal.journalId].reminder;
+        }
+        else {
+            mergedJournal.willAlarm = false;
+        }
+    }
+
+    updateAction->setText(tr("同步"));
+    flushLocalChangeToDB(shouldDelete);
+    flushLocalChangeToDB(shouldGet);
+    flushLocalChangeToDB(shouldMerge);
+    sortJournalsBy(sortBy);
     refreshLastUpdateTime();
+}
+
+bool MainWindow::flushLocalChangeToDB(const QList<LocalJournal>& shouldDelete)
+{
+    (void)shouldDelete;
+    return false;
+}
+
+bool MainWindow::flushLocalChangeToDB(const QMap<QString, LocalJournal>& 
+        shouldMerge)
+{
+    (void)shouldMerge;
+    return false;
 }
 
 void MainWindow::refreshLastUpdateTime()

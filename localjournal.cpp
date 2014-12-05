@@ -30,6 +30,11 @@ void logCreateLocalJournal(const LocalJournal& journal)
     }
 }
 
+bool operator <(const LocalJournal& a, const LocalJournal& b)
+{
+    return (a.journalId < b.journalId);
+}
+
 LocalJournal::LocalJournal()
 {
     deleted = true;
