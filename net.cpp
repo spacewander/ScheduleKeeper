@@ -78,7 +78,8 @@ bool Net::postUser(const QString& username, const QString& password,
     return status;
 }
 
-bool Net::getBasicJournalList(QList<BasicJournal> &journals)
+bool Net::getBasicJournalList(QList<BasicJournal> &journals,
+                              QMap<QString, QString> &journalIdToObjectId)
 {
     QNetworkRequest req = QNetworkRequest(basicJournalPath);
     setCommonHeader(&req);
@@ -92,18 +93,45 @@ bool Net::getBasicJournalList(QList<BasicJournal> &journals)
             BasicJournal journal;
             journal.read(i.toObject());
             journals.push_back(journal);
+            journalIdToObjectId[journal.journalId] = i.toObject()["objectId"]
+                    .toString();
         }
     }
     return ok;
 }
 
-bool Net::updateBasicJournal(const QList<BasicJournal>& willPut)
+bool Net::updateBasicJournal(const QList<BasicJournal>& willPut,
+                             const QMap<QString, QString> &journalIdToObjectId)
 {
-    bool ok = true;
+    QJsonObject batch;
+    QJsonArray putBasicJournals;
+    for (auto i : willPut) {
+        QJsonObject req;
+        req["method"] = QString("PUT");
+        req["path"] = batchReqPrefix + "BasicJournal/" +
+                journalIdToObjectId[i.journalId];
+        QJsonObject body;
+        i.write(body);
+        req["body"] = body;
+        putBasicJournals.push_back(req);
+    }
+    batch["requests"] = putBasicJournals;
+
+    QNetworkRequest req = QNetworkRequest(batchPath);
+    setCommonHeader(&req);
+
+    resUpdateBasicJournal = netAccess->post(req, QJsonDocument(batch).toJson());
+    blockUntilFinished(resUpdateBasicJournal);
+
+    bool ok = false;
+    if (checkStatusCode(resUpdateBasicJournal)) {
+        ok = ensureRemoteChanged(resUpdateBasicJournal);
+    }
     return ok;
 }
 
-bool Net::updateDetailJournal(const QList<DetailJournal>& willPut)
+bool Net::updateDetailJournal(const QList<DetailJournal>& willPut,
+                              const QMap<QString, QString> &journalIdToObjectId)
 {
     bool ok = true;
     return ok;
@@ -116,7 +144,8 @@ bool Net::updateRemoteJournal(QList<BasicJournal> &willPostB,
     return ok;
 }
 
- bool Net::getDetailJournal(const QList<QString>& objectIds, QList<DetailJournal> &journals)
+ bool Net::getDetailJournal(const QList<QString>& objectIds,
+                            QList<DetailJournal> &journals)
 {
     if (objectIds.size() == 0)
         return true;
@@ -132,7 +161,7 @@ bool Net::updateRemoteJournal(QList<BasicJournal> &willPostB,
 
     QNetworkRequest req = QNetworkRequest(batchPath);
     setCommonHeader(&req);
-    qDebug() << QJsonDocument(batch).toJson();
+
     resGetDetailJournal = netAccess->post(req, QJsonDocument(batch).toJson());
     blockUntilFinished(resGetDetailJournal);
 
@@ -151,7 +180,14 @@ bool Net::updateRemoteJournal(QList<BasicJournal> &willPostB,
 bool Net::mergeDetailJournal(const QList<QString>& objectIds, 
         QMap<QString, DetailJournal>& journals)
 {
-    bool ok = true;
+    QList<DetailJournal> journalsList;
+    bool ok = false;
+    ok = getDetailJournal(objectIds, journalsList);
+    if (ok) {
+        for (auto i : journalsList) {
+            journals[i.journalId] = i;
+        }
+    }
     return ok;
 }
 
@@ -213,11 +249,33 @@ QJsonArray Net::getBatchJSONResult(QNetworkReply *res)
     QJsonArray response = QJsonDocument::fromJson(content).array();
     QJsonArray results;
     for (auto i : response) {
+        // ignore some error results
         if (i.toObject()["success"] != QJsonValue::Undefined) {
             results.push_back(i.toObject()["success"]);
         }
+        else {
+            qDebug() << "batch error happened: " <<
+                        i.toObject()["error"].toObject()["error"].toString();
+        }
     }
     return results;
+}
+
+bool Net::ensureRemoteChanged(QNetworkReply *res)
+{
+    QByteArray content = res->readAll();
+    res->deleteLater();
+    qWarning() << "Batch url: " << res->url().toString() << " return: " << content;
+    QJsonArray response = QJsonDocument::fromJson(content).array();
+    for (auto i : response) {
+        QJsonValue error = i.toObject()["error"];
+        if (error.toString() != "") {
+            qDebug() << "batch error happened: " <<
+                        error.toObject()["error"].toString();
+            return false;
+        }
+    }
+    return true;
 }
 
 bool isConnected()

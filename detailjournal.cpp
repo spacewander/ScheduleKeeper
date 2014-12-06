@@ -40,7 +40,7 @@ void DetailJournal::write(QJsonObject &json) const
     json["username"] = username;
     json["detail"] = detail;
     if (reminder.isValid()) {
-        json["reminder"] = reminder.toString();
+        json["reminder"] = reminder.toString("yyyy-MM-ddTHH:mm:ss.zzzZ");
     }
     else {
         json["reminder"] = QString("");

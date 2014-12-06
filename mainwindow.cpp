@@ -170,7 +170,7 @@ void MainWindow::setUpJournals()
 
 void MainWindow::updateFailed(const QString &msg) const
 {
-    QMessageBox::information(nullptr, tr("同步失败"), tr("无法获取云端日程\n%1").arg(msg));
+    QMessageBox::information(nullptr, tr("同步失败"), tr("%1").arg(msg));
     updateAction->setText(tr("同步"));
 }
 
@@ -182,7 +182,9 @@ void MainWindow::updateJournals()
                   totalLocalJournals.size();
 
     QList<BasicJournal> journals;
-    if (!(net->getBasicJournalList(journals))) {
+    // a dict translate journalId to objectId
+    QMap<QString, QString> journalIdToObjectId;
+    if (!(net->getBasicJournalList(journals, journalIdToObjectId))) {
         updateFailed();
         return;
     }
@@ -197,6 +199,9 @@ void MainWindow::updateJournals()
 
     QList<QString> willGetObjectIds;
     QList<QString> willMergeObjectIds;
+    // lokk up objectIds with journalIds
+    QMap<QString, QString> willPutBObjectIdsDict;
+    QMap<QString, QString> willPutDObjectIdsDict;
     QMap<QString, LocalJournal> shouldGet;
     QList<LocalJournal> shouldDelete;
     QMap<QString, LocalJournal> shouldMerge;
@@ -246,15 +251,23 @@ void MainWindow::updateJournals()
             else if ((*j).deleted) {
                 (*i).deleteSelf();
                 willPutB.push_back(*i);
+                willPutBObjectIdsDict[(*i).journalId] =
+                            journalIdToObjectId[(*i).journalId];
             }
             else {
                 if ((*i).saveTime.isValid() && (*j).saveTime.isValid()) {
                     // there is change in local journal
                     if ((*i).saveTime < (*j).saveTime) {
                         BasicJournal b(*j);
+                        b.detailObjectId = (*i).detailObjectId;
                         willPutB.push_back(b);
+                        // journalId of *i is the same with *j
+                        // and journalId of *i is stored in journalIdToObjectId
+                        willPutBObjectIdsDict[(*i).journalId] =
+                                    journalIdToObjectId[(*i).journalId];
                         DetailJournal d(*j);
                         willPutD.push_back(d);
+                        willPutDObjectIdsDict[(*i).journalId] = (*i).detailObjectId;
                     }
                     // there is change in remote journal
                     else if ((*i).saveTime > (*j).saveTime) {
@@ -271,19 +284,22 @@ void MainWindow::updateJournals()
         }
     }
 
+    for (auto i : willPutBObjectIdsDict) {
+        qDebug() << i;
+    }
     qWarning() << "update: Put BasicJournal " << willPutB.size();
-    if (!(net->updateBasicJournal(willPutB))) {
-        updateFailed();
+    if (!(net->updateBasicJournal(willPutB, willPutBObjectIdsDict))) {
+        updateFailed(tr("提交本地日程失败"));
         return;
     }
     qWarning() << "update: Put DetailJournal " << willPutD.size();
-    if (!(net->updateDetailJournal(willPutD))) {
-        updateFailed();
+    if (!(net->updateDetailJournal(willPutD, willPutDObjectIdsDict))) {
+        updateFailed(tr("提交本地日程失败"));
         return;
     }
     qWarning() << "update: Post Journal " << willPostB.size();
     if (!(net->updateRemoteJournal(willPostB, willPostD))) {
-        updateFailed();
+        updateFailed(tr("提交本地日程失败"));
         return;
     }
 
@@ -327,6 +343,7 @@ void MainWindow::updateJournals()
         }
         else {
             mergedJournal.willAlarm = false;
+            mergedJournal.alarmTime = QDateTime::currentDateTime();
         }
     }
 

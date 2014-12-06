@@ -85,7 +85,7 @@ private slots:
 private:
     void setUpGUI();
     void setUpJournals();
-    void updateFailed(const QString& msg = "") const;
+    void updateFailed(const QString& msg = tr("无法获取云端日程")) const;
     void connectEditJournalPanel();
     void sortJournalsBy(SortBy sortBy);
 

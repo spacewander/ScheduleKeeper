@@ -30,7 +30,7 @@ void BasicJournal::write(QJsonObject &json) const
 {
     json["journalId"] = journalId;
     json["deleted"] = deleted;
-    json["saveTime"] = saveTime.toString();
+    json["saveTime"] = saveTime.toString("yyyy-MM-ddTHH:mm:ss.zzzZ");
     json["username"] = username;
     json["detailObjectId"] = detailObjectId;
 }

@@ -35,12 +35,15 @@ public:
     // all const Journal QLists should be sent to remote
 
     /// 获取要同步的当前所有BasicJournal
-    bool getBasicJournalList(QList<BasicJournal>& journals);
+    bool getBasicJournalList(QList<BasicJournal>& journals,
+                             QMap<QString, QString> &journalIdToObjectId);
     /// 更新要添加delete标记和要修改saveTime的BasicJournal
-    bool updateBasicJournal(const QList<BasicJournal>& willPut);
+    bool updateBasicJournal(const QList<BasicJournal>& willPut,
+                            const QMap<QString, QString> &journalIdToObjectId);
     
     /// 更新要修改的DetailJournal
-    bool updateDetailJournal(const QList<DetailJournal> &willPut);
+    bool updateDetailJournal(const QList<DetailJournal> &willPut,
+                             const QMap<QString, QString> &journalIdToObjectId);
     /**
      * 更新要创建的BasicJournal和要创建的DetailJournal
      * 创建willPostD中的日程后，以获取的objectId更新willPostB中的日程，然后再去创建willPostB
@@ -71,6 +74,7 @@ private:
     QJsonArray getJSONResult(QNetworkReply *res);
     /// used to Get all results of a batch query
     QJsonArray getBatchJSONResult(QNetworkReply *res);
+    bool ensureRemoteChanged(QNetworkReply *res);
     QPair<QString, QString>  userFound();
 
     QNetworkAccessManager* netAccess;
@@ -84,6 +88,7 @@ private:
     QNetworkReply* resGetDetailJournal;
     QNetworkReply* resUpdateDetailJournal;
     QNetworkReply* resUpdateBasicJournal;
+    QNetworkReply* resUpdateRemoteJournal;
 };
 
 bool isConnected();
