@@ -220,6 +220,7 @@ void MainWindow::updateJournals()
         // should upload these journals to remote
         if (i == journals.end() || (*j) < (*i)) {
             if (!((*j).deleted)) {
+                (*j).userName = username;
                 BasicJournal b(*j);
                 willPostB.push_back(b);
                 DetailJournal d(*j);

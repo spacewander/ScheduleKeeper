@@ -40,6 +40,8 @@ Net::Net(QObject *parent) :
     resGetDetailJournal = nullptr;
     resUpdateBasicJournal = nullptr;
     resUpdateDetailJournal = nullptr;
+    resPostBJournal = nullptr;
+    resPostDJournal = nullptr;
 }
 
 bool Net::isConnectedToNet()
@@ -137,11 +139,18 @@ bool Net::updateDetailJournal(const QList<DetailJournal>& willPut,
     return ok;
 }
 
-bool Net::updateRemoteJournal(QList<BasicJournal> &willPostB,
+bool Net::updateRemoteJournal(const QList<BasicJournal> &willPostB,
                               const QList<DetailJournal> &willPostD)
 {
-    bool ok = true;
-    return ok;
+    QMap<QString, QString> journalIdToObjectId;
+    bool ok = postDetailJournal(willPostD, journalIdToObjectId);
+    if (!ok)
+        return ok;
+    // remember to set the detailObjectId of BasicJournals
+    for (auto i : willPostB) {
+        i.detailObjectId = journalIdToObjectId[i.journalId];
+    }
+    return postBasicJournal(willPostB);
 }
 
  bool Net::getDetailJournal(const QList<QString>& objectIds,
@@ -161,7 +170,7 @@ bool Net::updateRemoteJournal(QList<BasicJournal> &willPostB,
 
     QNetworkRequest req = QNetworkRequest(batchPath);
     setCommonHeader(&req);
-
+qDebug() << QJsonDocument(batch).toJson();
     resGetDetailJournal = netAccess->post(req, QJsonDocument(batch).toJson());
     blockUntilFinished(resGetDetailJournal);
 
@@ -187,6 +196,66 @@ bool Net::mergeDetailJournal(const QList<QString>& objectIds,
         for (auto i : journalsList) {
             journals[i.journalId] = i;
         }
+    }
+    return ok;
+}
+
+bool Net::postDetailJournal(const QList<DetailJournal> &willPostD,
+                            QMap<QString, QString> &journalIdToObjectId)
+{
+    QJsonObject batch;
+    QJsonArray postDetailJournals;
+    for (auto i : willPostD) {
+        QJsonObject req;
+        req["method"] = QString("POST");
+        req["path"] = batchReqPrefix + "DetailJournal";
+        QJsonObject body;
+        i.write(body);
+        req["body"] = body;
+        postDetailJournals.push_back(req);
+    }
+    batch["requests"] = postDetailJournals;
+
+    QNetworkRequest req = QNetworkRequest(batchPath);
+    setCommonHeader(&req);
+    resPostDJournal = netAccess->post(req, QJsonDocument(batch).toJson());
+    blockUntilFinished(resPostDJournal);
+
+    bool ok = false;
+    if ((ok = checkStatusCode(resPostDJournal))) {
+        QJsonArray json = getBatchJSONResult(resPostDJournal);
+        for (auto i : json) {
+            QJsonObject journal(i.toObject());
+            QString journalId = journal["journalId"].toString();
+            journalIdToObjectId[journalId] = journal["objectId"].toString();
+        }
+    }
+    return ok;
+}
+
+bool Net::postBasicJournal(const QList<BasicJournal> &willPostB)
+{
+    QJsonObject batch;
+    QJsonArray postBasicJournals;
+    for (auto i : willPostB) {
+        QJsonObject req;
+        req["method"] = QString("POST");
+        req["path"] = batchReqPrefix + "BasicJournal";
+        QJsonObject body;
+        i.write(body);
+        req["body"] = body;
+        postBasicJournals.push_back(req);
+    }
+    batch["requests"] = postBasicJournals;
+//    qDebug() << QJsonDocument(batch).toJson();
+    QNetworkRequest req = QNetworkRequest(batchPath);
+    setCommonHeader(&req);
+    resPostBJournal = netAccess->post(req, QJsonDocument(batch).toJson());
+    blockUntilFinished(resPostBJournal);
+
+    bool ok = false;
+    if (checkStatusCode(resPostBJournal)) {
+        ok = ensureRemoteChanged(resPostBJournal);
     }
     return ok;
 }
