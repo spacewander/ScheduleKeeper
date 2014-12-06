@@ -135,7 +135,30 @@ bool Net::updateBasicJournal(const QList<BasicJournal>& willPut,
 bool Net::updateDetailJournal(const QList<DetailJournal>& willPut,
                               const QMap<QString, QString> &journalIdToObjectId)
 {
-    bool ok = true;
+    QJsonObject batch;
+    QJsonArray putDetailJournals;
+    for (auto i : willPut) {
+        QJsonObject req;
+        req["method"] = QString("PUT");
+        req["path"] = batchReqPrefix + "DetailJournal/" +
+                journalIdToObjectId[i.journalId];
+        QJsonObject body;
+        i.write(body);
+        req["body"] = body;
+        putDetailJournals.push_back(req);
+    }
+    batch["requests"] = putDetailJournals;
+
+    QNetworkRequest req = QNetworkRequest(batchPath);
+    setCommonHeader(&req);
+
+    resUpdateDetailJournal = netAccess->post(req, QJsonDocument(batch).toJson());
+    blockUntilFinished(resUpdateDetailJournal);
+
+    bool ok = false;
+    if (checkStatusCode(resUpdateDetailJournal)) {
+        ok = ensureRemoteChanged(resUpdateDetailJournal);
+    }
     return ok;
 }
 
@@ -170,7 +193,7 @@ bool Net::updateRemoteJournal(const QList<BasicJournal> &willPostB,
 
     QNetworkRequest req = QNetworkRequest(batchPath);
     setCommonHeader(&req);
-qDebug() << QJsonDocument(batch).toJson();
+
     resGetDetailJournal = netAccess->post(req, QJsonDocument(batch).toJson());
     blockUntilFinished(resGetDetailJournal);
 

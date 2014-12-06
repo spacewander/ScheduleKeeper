@@ -177,7 +177,7 @@ void MainWindow::updateFailed(const QString &msg) const
 void MainWindow::updateJournals()
 {
     Net* net = Net::getNetManager();
-    updateAction->setText(tr("开始同步"));
+    updateAction->setText(tr("同步中..."));
     qWarning() << "before update: total local journals: " <<
                   totalLocalJournals.size();
 
@@ -234,7 +234,7 @@ void MainWindow::updateJournals()
             if (!((*i).deleted)) {
                 LocalJournal journal;
                 journal.deleted = false;
-                journal.saveTime = (*i).saveTime;
+                journal.saveTime = (*i).saveTime.toTimeSpec(Qt::LocalTime);
                 journal.journalId = (*i).journalId;
                 journal.userName = (*i).username;
                 shouldGet[(*i).journalId] = journal;
@@ -257,8 +257,11 @@ void MainWindow::updateJournals()
             }
             else {
                 if ((*i).saveTime.isValid() && (*j).saveTime.isValid()) {
+                    // convert local datetime to UTC before comparing
+                    QDateTime local = (*j).saveTime.toUTC();
                     // there is change in local journal
-                    if ((*i).saveTime < (*j).saveTime) {
+                    if ((*i).saveTime < local) {
+                        (*j).userName = username;
                         BasicJournal b(*j);
                         b.detailObjectId = (*i).detailObjectId;
                         willPutB.push_back(b);
@@ -271,9 +274,9 @@ void MainWindow::updateJournals()
                         willPutDObjectIdsDict[(*i).journalId] = (*i).detailObjectId;
                     }
                     // there is change in remote journal
-                    else if ((*i).saveTime > (*j).saveTime) {
+                    else if ((*i).saveTime > local) {
                         LocalJournal tmp(*j);
-                        tmp.saveTime = (*i).saveTime;
+                        tmp.saveTime = (*i).saveTime.toTimeSpec(Qt::LocalTime);
                         shouldMerge[tmp.journalId] = tmp;
                         willMerge[tmp.journalId] = DetailJournal();
                         willMergeObjectIds.push_back((*i).detailObjectId);
@@ -285,9 +288,6 @@ void MainWindow::updateJournals()
         }
     }
 
-    for (auto i : willPutBObjectIdsDict) {
-        qDebug() << i;
-    }
     qWarning() << "update: Put BasicJournal " << willPutB.size();
     if (!(net->updateBasicJournal(willPutB, willPutBObjectIdsDict))) {
         updateFailed(tr("提交本地日程失败"));
@@ -318,7 +318,8 @@ void MainWindow::updateJournals()
         shouldGet[gotJournal.journalId].detail = gotJournal.detail;
         if (gotJournal.reminder.isValid()) {
             shouldGet[gotJournal.journalId].willAlarm = true;
-            shouldGet[gotJournal.journalId].alarmTime = gotJournal.reminder;
+            shouldGet[gotJournal.journalId].alarmTime =
+                    gotJournal.reminder.toTimeSpec(Qt::LocalTime);
         }
         else {
             shouldGet[gotJournal.journalId].willAlarm = false;
@@ -340,11 +341,11 @@ void MainWindow::updateJournals()
         mergedJournal.detail = willMerge[mergedJournal.journalId].detail;
         if (willMerge[mergedJournal.journalId].reminder.isValid()) {
             mergedJournal.willAlarm = true;
-            mergedJournal.alarmTime = willMerge[mergedJournal.journalId].reminder;
+            mergedJournal.alarmTime = willMerge[mergedJournal.journalId]
+                    .reminder.toTimeSpec(Qt::LocalTime);
         }
         else {
             mergedJournal.willAlarm = false;
-            mergedJournal.alarmTime = QDateTime::currentDateTime();
         }
     }
 
@@ -359,14 +360,14 @@ void MainWindow::updateJournals()
 
 bool MainWindow::flushLocalChangeToDB(const QList<LocalJournal>& shouldDelete)
 {
-    (void)shouldDelete;
+
     return false;
 }
 
 bool MainWindow::flushLocalChangeToDB(const QMap<QString, LocalJournal>& 
         shouldMerge)
 {
-    (void)shouldMerge;
+
     return false;
 }
 

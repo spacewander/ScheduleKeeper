@@ -30,7 +30,8 @@ void BasicJournal::write(QJsonObject &json) const
 {
     json["journalId"] = journalId;
     json["deleted"] = deleted;
-    json["saveTime"] = saveTime.toString("yyyy-MM-ddTHH:mm:ss.zzzZ");
+    // convert all time to UTC format before sending to remote
+    json["saveTime"] = saveTime.toUTC().toString("yyyy-MM-ddTHH:mm:ss.zzzZ");
     json["username"] = username;
     json["detailObjectId"] = detailObjectId;
 }
