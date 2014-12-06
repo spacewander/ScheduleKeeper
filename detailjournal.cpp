@@ -27,7 +27,8 @@ void DetailJournal::read(const QJsonObject &json)
     username = json["username"].toString();
     detail = json["detail"].toString();
     if (json["reminder"] != QString("")) {
-        reminder = json["reminder"].toVariant().toDateTime();
+        reminder = json["reminder"].toVariant().toDateTime()
+                .toTimeSpec(Qt::LocalTime);
     }
     else {
         reminder = QDateTime();

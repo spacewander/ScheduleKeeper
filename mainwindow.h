@@ -95,8 +95,9 @@ private:
      * 更新最近一次更新的时间，会修改相关的UI
      */
     void refreshLastUpdateTime();
-    bool flushLocalChangeToDB(const QList<LocalJournal>& shouldDelete);
-    bool flushLocalChangeToDB(const QMap<QString, LocalJournal>& shouldMerge);
+    bool deleteLocalInDB(const QList<LocalJournal>& shouldDelete);
+    bool updateLocalInDB(const QMap<QString, LocalJournal>& shouldMerge);
+    bool insertLocalInDB(const QMap<QString, LocalJournal>& shouldGet);
     QDateTime lastUpdateTime;
 
     QString username;

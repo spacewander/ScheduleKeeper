@@ -21,7 +21,8 @@ void BasicJournal::read(const QJsonObject &json)
 {
     journalId = json["journalId"].toString();
     deleted = json["deleted"].toBool();
-    saveTime = json["saveTime"].toVariant().toDateTime();
+    saveTime = json["saveTime"].toVariant().toDateTime()
+            .toTimeSpec(Qt::LocalTime);
     username = json["username"].toString();
     detailObjectId = json["detailObjectId"].toString();
 }

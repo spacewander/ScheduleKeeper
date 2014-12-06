@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QIcon icon = QIcon(":/rs/alarm-512.png");
     setWindowIcon(icon);
     isSearched = false;
-    sortBy = SortByNull;
+    sortBy = SortBySaveTime;
 }
 
 MainWindow::~MainWindow()
@@ -176,6 +176,8 @@ void MainWindow::updateFailed(const QString &msg) const
 
 void MainWindow::updateJournals()
 {
+    sortJournalsBy(sortBy); // 从数据库中重新获取数据
+
     Net* net = Net::getNetManager();
     updateAction->setText(tr("同步中..."));
     qWarning() << "before update: total local journals: " <<
@@ -214,11 +216,13 @@ void MainWindow::updateJournals()
 
     auto j = totalLocalJournals.begin();
     auto i = journals.begin();
+
     // don't modify *j, modify its copy and store to shouldDelete
     while (i != journals.end() || j != totalLocalJournals.end()) {
+
         // remote journal later than local journal =>
         // should upload these journals to remote
-        if (i == journals.end() || (*j) < (*i)) {
+        if (i == journals.end() || ( j != totalLocalJournals.end() && (*j) < (*i) ) ) {
             if (!((*j).deleted)) {
                 (*j).userName = username;
                 BasicJournal b(*j);
@@ -228,6 +232,7 @@ void MainWindow::updateJournals()
             }
             ++j;
         }
+
         // remote journal earlier than local journal => 
         // should download these journals to local
         else if (j == totalLocalJournals.end() || (*i) < (*j)) {
@@ -242,25 +247,27 @@ void MainWindow::updateJournals()
             }
             ++i;
         }
+
         // the remote journal and local journal have same journalId
         else {
             if ((*i).deleted) {
-                LocalJournal tmp(*j);
-                tmp.clear();
-                shouldDelete.push_back(tmp);
+                shouldDelete.push_back(*j);
             }
+
             else if ((*j).deleted) {
                 (*i).deleteSelf();
                 willPutB.push_back(*i);
                 willPutBObjectIdsDict[(*i).journalId] =
                             journalIdToObjectId[(*i).journalId];
             }
+
             else {
                 if ((*i).saveTime.isValid() && (*j).saveTime.isValid()) {
-                    // convert local datetime to UTC before comparing
-                    QDateTime local = (*j).saveTime.toUTC();
+                    if ((*j).journalId == QString("1418000000")) {
+                        qDebug() << (*i).saveTime << " " << (*j).saveTime;
+                    }
                     // there is change in local journal
-                    if ((*i).saveTime < local) {
+                    if ((*i).saveTime < (*j).saveTime) {
                         (*j).userName = username;
                         BasicJournal b(*j);
                         b.detailObjectId = (*i).detailObjectId;
@@ -274,9 +281,9 @@ void MainWindow::updateJournals()
                         willPutDObjectIdsDict[(*i).journalId] = (*i).detailObjectId;
                     }
                     // there is change in remote journal
-                    else if ((*i).saveTime > local) {
+                    else if ((*i).saveTime > (*j).saveTime) {
                         LocalJournal tmp(*j);
-                        tmp.saveTime = (*i).saveTime.toTimeSpec(Qt::LocalTime);
+                        tmp.saveTime = (*i).saveTime;
                         shouldMerge[tmp.journalId] = tmp;
                         willMerge[tmp.journalId] = DetailJournal();
                         willMergeObjectIds.push_back((*i).detailObjectId);
@@ -336,39 +343,69 @@ void MainWindow::updateJournals()
         updateFailed();
         return;
     }
-    for (auto mergedJournal : shouldMerge) {
-        mergedJournal.userName = willMerge[mergedJournal.journalId].username;
-        mergedJournal.detail = willMerge[mergedJournal.journalId].detail;
-        if (willMerge[mergedJournal.journalId].reminder.isValid()) {
-            mergedJournal.willAlarm = true;
-            mergedJournal.alarmTime = willMerge[mergedJournal.journalId]
+    for (auto it = shouldMerge.begin(); it != shouldMerge.end(); ++it) {
+        (*it).userName = willMerge[(*it).journalId].username;
+        (*it).detail = willMerge[(*it).journalId].detail;
+        if (willMerge[(*it).journalId].reminder.isValid()) {
+            (*it).willAlarm = true;
+            (*it).alarmTime = willMerge[(*it).journalId]
                     .reminder.toTimeSpec(Qt::LocalTime);
         }
         else {
-            mergedJournal.willAlarm = false;
+            (*it).willAlarm = false;
         }
     }
 
     qDebug() << "should Delete " << shouldDelete.size();
+
     updateAction->setText(tr("同步"));
-    flushLocalChangeToDB(shouldDelete);
-    flushLocalChangeToDB(shouldGet);
-    flushLocalChangeToDB(shouldMerge);
+    deleteLocalInDB(shouldDelete);
+    insertLocalInDB(shouldGet);
+    updateLocalInDB(shouldMerge);
+
     sortJournalsBy(sortBy);
     refreshLastUpdateTime();
 }
 
-bool MainWindow::flushLocalChangeToDB(const QList<LocalJournal>& shouldDelete)
+bool MainWindow::deleteLocalInDB(const QList<LocalJournal>& shouldDelete)
 {
-
-    return false;
+    JournalsTable *db = JournalsTable::getJournalsTable();
+    bool ok;
+    for (auto i : shouldDelete) {
+        ok = db->deleteJournal(i.journalId);
+        if (!ok) {
+            break;
+        }
+    }
+    return ok;
 }
 
-bool MainWindow::flushLocalChangeToDB(const QMap<QString, LocalJournal>& 
-        shouldMerge)
+bool MainWindow::updateLocalInDB(const QMap<QString, LocalJournal>& shouldMerge)
 {
+    JournalsTable *db = JournalsTable::getJournalsTable();
+    bool ok;
+    for (auto i : shouldMerge) {
+//        qDebug() << "id " << i.journalId << " alaram " << i.alarmTime << " detail " << i.detail;
+        ok = db->updateJournal(i);
+        if (!ok) {
+            break;
+        }
+    }
+    return ok;
+}
 
-    return false;
+bool MainWindow::insertLocalInDB(const QMap<QString, LocalJournal>& shouldGet)
+{
+    JournalsTable *db = JournalsTable::getJournalsTable();
+    bool ok;
+    for (auto i : shouldGet) {
+//        qDebug() << "id " << i.journalId << " alaram " << i.alarmTime << " detail " << i.detail;
+        ok = db->insertJournal(i);
+        if (!ok) {
+            break;
+        }
+    }
+    return ok;
 }
 
 void MainWindow::refreshLastUpdateTime()
@@ -447,8 +484,8 @@ void MainWindow::connectEditJournalPanel()
 void MainWindow::sortJournalsBy(SortBy sortBy)
 {
     switchSearchToDisplay();
-    if (sortBy == this->sortBy)
-        return;
+//    if (sortBy == this->sortBy)
+//        return;
     switch (sortBy) {
     case SortBySaveTime:
         popupBtn->setText(tr("按修改时间排序"));

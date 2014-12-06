@@ -48,7 +48,7 @@ public:
      * 更新要创建的BasicJournal和要创建的DetailJournal
      * 创建willPostD中的日程后，以获取的objectId更新willPostB中的日程，然后再去创建willPostB
      */
-    bool updateRemoteJournal(const QList<BasicJournal>& willPostB,
+    bool updateRemoteJournal(QList<BasicJournal>& willPostB,
                              const QList<DetailJournal>& willPostD);
     /// 获取要新增的DetailJournal
     bool getDetailJournal(const QList<QString>& objectIds, QList<DetailJournal>& journals);

@@ -43,7 +43,7 @@ bool JournalsTable::deleteJournal(const QString &journalId)
     if (journals->rowCount() == 1) {
 //        do not actually delete
 //        journals->removeRows(0,1);
-        LocalJournal journal;
+        LocalJournal journal; // 默认构造函数会构造出“被删除”的对象
         journal.journalId = journalId;
         return updateJournal_(0, journal);
     }
@@ -111,7 +111,8 @@ bool JournalsTable::submitAll()
 
 const QList<LocalJournal>& JournalsTable::selectJournal(SortBy sortBy)
 {
-    journals->setFilter(""); // reset Filter
+//    journals->setFilter(""); // reset Filter
+    journals->setFilter(" deleted = 0 ");
     switch (sortBy) {
     case SortBySaveTime:
         journals->setSort(1, Qt::DescendingOrder);

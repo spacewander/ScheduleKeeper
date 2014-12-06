@@ -27,6 +27,12 @@ class JournalsTable : public QObject
     Q_OBJECT
 public:
     static JournalsTable* getJournalsTable();
+    /**
+     * @brief deleteJournal
+     * @param journalId
+     * 不是真正地删掉journal，只是把journalId相等的第一个Journal设置为删除模式
+     * 把deleted设置为false，然后journalId设置为""
+     */
     bool deleteJournal(const QString& journalId);
     bool updateJournal(const LocalJournal& newJournal);
     bool insertJournal(const LocalJournal& journal);
