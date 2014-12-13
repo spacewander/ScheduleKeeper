@@ -125,7 +125,7 @@ void MainWindow::setUpGUI()
     updateAction = new QAction(tr("同步"), this);
     connect(updateAction, SIGNAL(triggered()), this, SLOT(updateJournals()));
     QString lastUpdateTime(tr("尚未同步"));
-    settings.value("lastUpdateTime", lastUpdateTime);
+    settings.value("lastupdatetime", lastUpdateTime);
     lastUpdateLabel = new QLabel(lastUpdateTime);
     lastUpdateLabel->setMinimumWidth(200);
     lastUpdateLabel->setAlignment(Qt::AlignCenter);
@@ -263,9 +263,6 @@ void MainWindow::updateJournals()
 
             else {
                 if ((*i).saveTime.isValid() && (*j).saveTime.isValid()) {
-                    if ((*j).journalId == QString("1418000000")) {
-                        qDebug() << (*i).saveTime << " " << (*j).saveTime;
-                    }
                     // there is change in local journal
                     if ((*i).saveTime < (*j).saveTime) {
                         (*j).userName = username;
@@ -332,7 +329,7 @@ void MainWindow::updateJournals()
             shouldGet[gotJournal.journalId].willAlarm = false;
         }
     }
-
+    qDebug() << shouldGet.size();
     qWarning() << "update: Will Merge DetailJournal " << willMergeObjectIds.size();
     if (!(net->mergeDetailJournal(willMergeObjectIds, willMerge))) {
         updateFailed();
@@ -370,8 +367,9 @@ void MainWindow::updateJournals()
 bool MainWindow::deleteLocalInDB(const QList<LocalJournal>& shouldDelete)
 {
     JournalsTable *db = JournalsTable::getJournalsTable();
-    bool ok;
+    bool ok = true;
     for (auto i : shouldDelete) {
+        qDebug() << "D id " << i.journalId << " alaram " << i.alarmTime << " detail " << i.detail;
         ok = db->deleteJournal(i.journalId);
         if (!ok) {
             break;
@@ -383,9 +381,9 @@ bool MainWindow::deleteLocalInDB(const QList<LocalJournal>& shouldDelete)
 bool MainWindow::updateLocalInDB(const QMap<QString, LocalJournal>& shouldMerge)
 {
     JournalsTable *db = JournalsTable::getJournalsTable();
-    bool ok;
+    bool ok = true;
     for (auto i : shouldMerge) {
-//        qDebug() << "id " << i.journalId << " alaram " << i.alarmTime << " detail " << i.detail;
+        qDebug() << "U id " << i.journalId << " alaram " << i.alarmTime << " detail " << i.detail;
         ok = db->updateJournal(i);
         if (!ok) {
             break;
@@ -397,9 +395,10 @@ bool MainWindow::updateLocalInDB(const QMap<QString, LocalJournal>& shouldMerge)
 bool MainWindow::insertLocalInDB(const QMap<QString, LocalJournal>& shouldGet)
 {
     JournalsTable *db = JournalsTable::getJournalsTable();
-    bool ok;
+    bool ok = true;
+//    qDebug() << shouldGet.size();
     for (auto i : shouldGet) {
-//        qDebug() << "id " << i.journalId << " alaram " << i.alarmTime << " detail " << i.detail;
+        qDebug() << "I id " << i.journalId << " alaram " << i.alarmTime << " detail " << i.detail;
         ok = db->insertJournal(i);
         if (!ok) {
             break;
@@ -464,11 +463,11 @@ void MainWindow::switchSearchToDisplay()
 {
     if (isSearched == true) {
         isSearched = false;
-        searchEdit->clear();
-        clearSearchResultAction->setEnabled(false);
         journalList.setJournals(totalLocalJournals);
         journalListView->reset();
     }
+    searchEdit->setText("");
+    clearSearchResultAction->setEnabled(false);
 }
 
 void MainWindow::connectEditJournalPanel()

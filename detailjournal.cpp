@@ -1,5 +1,6 @@
 #include <QJsonObject>
 #include <QVariant>
+#include <QDebug>
 
 #include "detailjournal.h"
 #include "localjournal.h"
@@ -23,8 +24,8 @@ DetailJournal::DetailJournal(const LocalJournal &journal)
 
 void DetailJournal::read(const QJsonObject &json)
 {
-    journalId = json["journalId"].toString();
-    username = json["username"].toString();
+    journalId = QString("%1").arg(static_cast<qint64>(json["journalId"].toDouble()));
+    username = "a";//json["username"].toString();
     detail = json["detail"].toString();
     if (json["reminder"] != QString("")) {
         reminder = json["reminder"].toVariant().toDateTime()
@@ -37,11 +38,11 @@ void DetailJournal::read(const QJsonObject &json)
 
 void DetailJournal::write(QJsonObject &json) const
 {
-    json["journalId"] = journalId;
-    json["username"] = username;
+    json["journalId"] = static_cast<qint64>(journalId.toLongLong());
+//    json["username"] = username;
     json["detail"] = detail;
     if (reminder.isValid()) {
-        json["reminder"] = reminder.toUTC().toString("yyyy-MM-ddTHH:mm:ss.zzzZ");
+        json["reminder"] = reminder.toUTC().toString("yyyy-MM-dd HH:mm");
     }
     else {
         json["reminder"] = QString("");

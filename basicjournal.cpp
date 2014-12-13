@@ -1,5 +1,6 @@
 #include <QJsonObject>
 #include <QVariant>
+#include <QDebug>
 
 #include "basicjournal.h"
 #include "localjournal.h"
@@ -19,22 +20,24 @@ BasicJournal::BasicJournal(const LocalJournal &journal)
 
 void BasicJournal::read(const QJsonObject &json)
 {
-    journalId = json["journalId"].toString();
+//    qDebug() << json["journalId"].toDouble();
+    journalId = QString("%1").arg(static_cast<qint64>(json["journalId"].toDouble()));
     deleted = json["deleted"].toBool();
-    saveTime = json["saveTime"].toVariant().toDateTime()
-            .toTimeSpec(Qt::LocalTime);
-    username = json["username"].toString();
-    detailObjectId = json["detailObjectId"].toString();
+    QDateTime mtime;
+    mtime.setMSecsSinceEpoch(static_cast<qint64>(json["savetime"].toDouble()));
+    saveTime = mtime.toLocalTime();
+    username = "a";//json["username"].toString();
+    detailObjectId = json["detailobjectId"].toString();
 }
 
 void BasicJournal::write(QJsonObject &json) const
 {
-    json["journalId"] = journalId;
+    json["journalId"] = static_cast<qint64>(journalId.toLongLong());
     json["deleted"] = deleted;
     // convert all time to UTC format before sending to remote
-    json["saveTime"] = saveTime.toUTC().toString("yyyy-MM-ddTHH:mm:ss.zzzZ");
-    json["username"] = username;
-    json["detailObjectId"] = detailObjectId;
+    json["savetime"] = saveTime.toUTC().toMSecsSinceEpoch();
+//    json["username"] = username;
+    json["detailobjectId"] = detailObjectId;
 }
 
 void BasicJournal::deleteSelf()

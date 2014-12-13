@@ -72,8 +72,7 @@ void LocalJournal::clear()
 void LocalJournal::generalizeID()
 {
     QDateTime current = QDateTime::currentDateTimeUtc();
-    journalId = QString::number(
-                QDateTime(QDate(1970, 1, 1), QTime(0, 0)).secsTo(current));
+    journalId = QString::number(current.toMSecsSinceEpoch());
 }
 
 const QString LocalJournal::getAlarm() const

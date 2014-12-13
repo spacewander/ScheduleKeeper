@@ -10,9 +10,9 @@
 const QString Prefix = "https://leancloud.cn/1.1/";
 const QString batchReqPrefix = "/1.1/classes/";
 const QByteArray AppIDHeader("X-AVOSCloud-Application-Id" );
-const QByteArray AppID("a5m764pwiwtgqfskkf9rdaxhn8fre7hszfwxxb9wqa9f3m3a");
+const QByteArray AppID("fgcjbm4lgby7lem6erh595k3nduag4l7qs00jbx7xdcixwyt");
 const QByteArray AppKeyHeader("X-AVOSCloud-Application-Key");
-const QByteArray AppKey("99qovpilikhhin05jpygfcqfqph9fq7apcemik37zn36f1kd");
+const QByteArray AppKey("q00yuhfslnqjhvmptppmtxwsu7tsuvefh3wrsowagta9xanx");
 const QByteArray MimeHeader("Content-Type");
 const QByteArray Mime("application/json");
 
