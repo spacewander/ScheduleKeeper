@@ -125,7 +125,7 @@ void MainWindow::setUpGUI()
     updateAction = new QAction(tr("同步"), this);
     connect(updateAction, SIGNAL(triggered()), this, SLOT(updateJournals()));
     QString lastUpdateTime(tr("尚未同步"));
-    settings.value("lastupdatetime", lastUpdateTime);
+    lastUpdateTime = settings.value("lastupdatetime", lastUpdateTime).toString();
     lastUpdateLabel = new QLabel(lastUpdateTime);
     lastUpdateLabel->setMinimumWidth(200);
     lastUpdateLabel->setAlignment(Qt::AlignCenter);
